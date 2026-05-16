@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>深蓝君 - 人力资源数智化专家</title>
+<meta name="description" content="深蓝君徐刚，人力资源数智化专家，提供AI+人力资源培训、工作坊、轻咨询服务。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<style>
+:root {
+  --primary: #0a1628;
+  --primary-light: #1e3a5f;
+  --accent: #5ba8e6;
+  --accent-light: #8ecaf7;
+  --text: #f0f4f8;
+  --text-muted: #94a3b8;
+  --bg: #0a1628;
+  --card-bg: rgba(30, 58, 95, 0.4);
+  --border: rgba(148, 163, 184, 0.15);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.8;
+  overflow-x: hidden;
+}
+
+/* Header */
+.header {
+  position: fixed; top: 0; left: 0; right: 0;
+  background: rgba(10, 22, 40, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.header-inner {
+  max-width: 1200px; margin: 0 auto;
+  padding: 0 24px;
+  display: flex; justify-content: space-between; align-items: center;
+  height: 64px;
+}
+
+.logo {
+  font-size: 1.4rem; font-weight: 700;
+  color: var(--text);
+  letter-spacing: 2px;
+}
+
+.logo span { color: var(--accent); }
+
+.nav { display: flex; gap: 32px; }
+
+.nav a {
+  color: var(--text-muted); text-decoration: none;
+  font-size: 0.95rem; font-weight: 500;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+.nav a:hover, .nav a.active { color: var(--text); }
+
+.nav a::after {
+  content: ''; position: absolute; bottom: -4px; left: 0;
+  width: 0; height: 2px; background: var(--accent);
+  transition: width 0.3s ease;
+}
+
+.nav a:hover::after, .nav a.active::after { width: 100%; }
+
+.mobile-menu-btn {
+  display: none; background: none; border: none;
+  color: var(--text); font-size: 1.5rem; cursor: pointer;
+}
+
+/* Hero */
+.hero {
+  min-height: 100vh;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center;
+  padding: 100px 24px 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(30, 58, 95, 0.4) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(201, 162, 39, 0.08) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.hero-content { position: relative; z-index: 1; max-width: 800px; }
+
+.hero-badge {
+  display: inline-block;
+  padding: 6px 20px;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-size: 0.85rem; font-weight: 500;
+  border-radius: 30px; letter-spacing: 2px;
+  margin-bottom: 28px;
+}
+
+.hero h1 {
+  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+
+.hero h1 span { color: var(--accent); }
+
+.hero-subtitle {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  color: var(--text-muted);
+  margin-bottom: 40px;
+  max-width: 600px; margin-left: auto; margin-right: auto;
+}
+
+.hero-cta {
+  display: inline-flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+}
+
+.btn {
+  padding: 14px 36px;
+  border-radius: 8px;
+  font-size: 1rem; font-weight: 600;
+  cursor: pointer; transition: all 0.3s ease;
+  text-decoration: none; border: none;
+  display: inline-block;
+}
+
+.btn-primary {
+  background: var(--accent); color: var(--primary);
+}
+
+.btn-primary:hover {
+  background: var(--accent-light);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(201, 162, 39, 0.3);
+}
+
+.btn-outline {
+  background: transparent; color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-outline:hover {
+  border-color: var(--accent); color: var(--accent);
+}
+
+/* Section */
+.section {
+  padding: 100px 24px;
+  max-width: 1100px; margin: 0 auto;
+}
+
+.section-title {
+  text-align: center; margin-bottom: 60px;
+}
+
+.section-title h2 {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 700; margin-bottom: 12px;
+}
+
+.section-title p {
+  color: var(--text-muted); font-size: 1.05rem;
+  max-width: 600px; margin: 0 auto;
+}
+
+.section-title .line {
+  width: 60px; height: 3px; background: var(--accent);
+  margin: 16px auto 0; border-radius: 2px;
+}
+
+/* About */
+.about-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 60px; align-items: center;
+}
+
+.about-image {
+  position: relative;
+}
+
+.about-image {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding-right: 40px;
+}
+
+.about-image img {
+  width: 85%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  object-position: top center;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  display: block;
+}
+
+.about-image::before {
+  content: ''; position: absolute;
+  top: 16px; left: 0; right: calc(15% + 40px - 16px); bottom: -16px;
+  border: 2px solid var(--accent);
+  border-radius: 16px; opacity: 0.3; z-index: -1;
+}
+
+.about-text h3 {
+  font-size: 1.5rem; margin-bottom: 20px;
+  color: var(--accent);
+}
+
+.about-text p {
+  color: var(--text-muted); margin-bottom: 16px;
+}
+
+.highlight-list {
+  list-style: none; margin-top: 20px;
+}
+
+.highlight-list li {
+  padding: 8px 0; padding-left: 28px;
+  position: relative; color: var(--text-muted);
+}
+
+.highlight-list li::before {
+  content: '\2713'; position: absolute; left: 0;
+  color: var(--accent); font-weight: bold;
+}
+
+/* Services */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.service-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px 28px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.service-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(201, 162, 39, 0.3);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+.service-icon {
+  width: 64px; height: 64px;
+  background: rgba(201, 162, 39, 0.1);
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 1.8rem;
+}
+
+.service-card h3 {
+  font-size: 1.2rem; margin-bottom: 12px;
+}
+
+.service-card p {
+  color: var(--text-muted); font-size: 0.95rem;
+}
+
+/* Books */
+.books-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+}
+
+.book-card {
+  display: flex; gap: 24px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px;
+  transition: all 0.3s ease;
+}
+
+.book-card:hover {
+  border-color: rgba(201, 162, 39, 0.3);
+}
+
+.book-cover {
+  width: 100px; min-width: 100px;
+  aspect-ratio: 3/4;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.book-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.book-info h4 {
+  font-size: 1.1rem; margin-bottom: 8px;
+}
+
+.book-info p {
+  color: var(--text-muted); font-size: 0.9rem;
+}
+
+.book-info .publisher {
+  color: var(--accent); font-size: 0.85rem;
+  margin-top: 8px; font-weight: 500;
+}
+
+/* Experience */
+.exp-timeline {
+  position: relative;
+  padding-left: 32px;
+}
+
+.exp-timeline::before {
+  content: ''; position: absolute; left: 8px; top: 0; bottom: 0;
+  width: 2px; background: var(--border);
+}
+
+.exp-item {
+  position: relative; margin-bottom: 40px;
+}
+
+.exp-item::before {
+  content: ''; position: absolute; left: -28px; top: 6px;
+  width: 12px; height: 12px;
+  background: var(--accent);
+  border-radius: 50%;
+  border: 3px solid var(--bg);
+}
+
+.exp-item h4 {
+  font-size: 1.1rem; margin-bottom: 8px;
+}
+
+.exp-item p {
+  color: var(--text-muted); font-size: 0.95rem;
+}
+
+/* Contact */
+.contact-section {
+  background: linear-gradient(135deg, rgba(30, 58, 95, 0.3) 0%, rgba(10, 22, 40, 0.5) 100%);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.contact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px;
+  max-width: 700px; margin: 0 auto;
+}
+
+.contact-item {
+  text-align: center;
+  padding: 32px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.contact-item:hover {
+  border-color: rgba(201, 162, 39, 0.3);
+}
+
+.contact-icon {
+  width: 56px; height: 56px;
+  background: rgba(201, 162, 39, 0.1);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 1.5rem;
+}
+
+.contact-item h4 {
+  font-size: 1rem; margin-bottom: 8px;
+}
+
+.contact-item p, .contact-item a {
+  color: var(--text-muted); font-size: 0.95rem;
+  text-decoration: none;
+  word-break: break-all;
+}
+
+.contact-item a:hover { color: var(--accent); }
+
+/* QR Section */
+.qr-section {
+  background: rgba(30, 58, 95, 0.15);
+}
+
+.qr-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.qr-card {
+  text-align: center;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px 24px;
+  transition: all 0.3s ease;
+}
+
+.qr-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(91, 168, 230, 0.3);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+.qr-card img {
+  width: 160px;
+  height: 160px;
+  object-fit: contain;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.qr-card h4 {
+  font-size: 1.05rem;
+  margin-bottom: 8px;
+}
+
+.qr-card p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+/* Toolbox Section */
+.toolbox-section {
+  background: linear-gradient(135deg, rgba(30, 58, 95, 0.3) 0%, rgba(10, 22, 40, 0.5) 100%);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.toolbox-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.toolbox-info h3 {
+  font-size: 1.4rem;
+  margin-bottom: 16px;
+  color: var(--accent);
+}
+
+.toolbox-info p {
+  color: var(--text-muted);
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+}
+
+.toolbox-tools {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.toolbox-tool {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.toolbox-tool::before {
+  content: '\2726';
+  color: var(--accent);
+  font-size: 0.8rem;
+}
+
+.toolbox-qr {
+  text-align: center;
+}
+
+.toolbox-qr img {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.toolbox-qr p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  padding: 40px 24px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  border-top: 1px solid var(--border);
+}
+
+.footer-brand {
+  font-size: 1.2rem; font-weight: 700;
+  color: var(--text); margin-bottom: 8px;
+}
+
+/* Reveal animation */
+.reveal {
+  opacity: 0; transform: translateY(40px);
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reveal.active {
+  opacity: 1; transform: translateY(0);
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .nav { display: none; }
+  .mobile-menu-btn { display: block; }
+  .about-grid { grid-template-columns: 1fr; gap: 40px; }
+  .services-grid { grid-template-columns: 1fr; }
+  .books-grid { grid-template-columns: 1fr; }
+  .book-card { flex-direction: column; align-items: center; text-align: center; }
+  .contact-grid { grid-template-columns: 1fr; }
+  .qr-grid { grid-template-columns: 1fr; max-width: 320px; }
+  .toolbox-grid { grid-template-columns: 1fr; gap: 40px; }
+  .toolbox-tools { grid-template-columns: 1fr; }
+  .section { padding: 60px 24px; }
+  .hero { min-height: auto; padding-top: 100px; padding-bottom: 60px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header" id="header">
+  <div class="header-inner">
+    <div class="logo">深蓝<span>信息</span></div>
+    <nav class="nav" id="nav">
+      <a href="#about" class="active">关于我</a>
+      <a href="#services">服务</a>
+      <a href="#books">著作</a>
+      <a href="#experience">经历</a>
+      <a href="#follow">关注</a>
+      <a href="#contact">联系</a>
+    </nav>
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="菜单">&#9776;</button>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="hero" id="hero">
+  <div class="hero-content">
+    <div class="hero-badge">人力资源数智化专家</div>
+    <h1>你好，我是<span>深蓝君</span></h1>
+    <p class="hero-subtitle">
+      16年 IT + 10年 HR 跨界经验，聚焦 AI + 人力资源数智化，<br>
+      帮助企业与 HR 专业人士实现数字化转型升级。
+    </p>
+    <div class="hero-cta">
+      <a href="#services" class="btn btn-primary">了解服务</a>
+      <a href="#contact" class="btn btn-outline">联系我</a>
+    </div>
+  </div>
+</section>
+
+<!-- About -->
+<section class="section" id="about">
+  <div class="section-title reveal">
+    <h2>关于我</h2>
+    <p>跨界视野，独到洞察</p>
+    <div class="line"></div>
+  </div>
+  <div class="about-grid reveal">
+    <div class="about-image">
+      <img src="images/photo.png" alt="深蓝君徐刚">
+    </div>
+    <div class="about-text">
+      <h3>徐刚 / 深蓝君</h3>
+      <p>
+        拥有 IBM、Pfizer、GSK 等世界知名 500 强企业 16 年 IT 与 10 年 HR 经验，对人力资源管理有独特视角与洞察。
+      </p>
+      <p>
+        作为人力资源领域知名「深蓝信息」公众号与视频号主理人，持续分享对人力资源管理实操与趋势的独到见解。
+      </p>
+      <ul class="highlight-list">
+        <li>500 强企业 IT + HR 双重视角</li>
+        <li>深耕人力资源数字化转型</li>
+        <li>公众号 / 视频号持续内容输出</li>
+        <li>复旦 MBA 人力资源协会常务理事</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Services -->
+<section class="section" id="services" style="background: rgba(30,58,95,0.15);">
+  <div class="section-title reveal">
+    <h2>服务项目</h2>
+    <p>为企业提供全方位人力资源数智化解决方案</p>
+    <div class="line"></div>
+  </div>
+  <div class="services-grid reveal">
+    <div class="service-card">
+      <div class="service-icon">&#128187;</div>
+      <h3>数智化培训</h3>
+      <p>AI + 人力资源数智化主题培训，帮助企业 HR 团队掌握数字化工具与思维，提升组织效能。</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">&#127919;</div>
+      <h3>互动工作坊</h3>
+      <p>以共创交流形式开展工作坊，聚焦实际业务场景，通过实战演练帮助团队落地数智化方案。</p>
+    </div>
+    <div class="service-card">
+      <div class="service-icon">&#128161;</div>
+      <h3>轻咨询服务</h3>
+      <p>针对企业 HR 数字化转型的具体问题，提供轻量级、可落地的咨询建议与实施路径。</p>
+    </div>
+  </div>
+</section>
+
+<!-- Books -->
+<section class="section" id="books">
+  <div class="section-title reveal">
+    <h2>专业著作</h2>
+    <p>机械工业出版社权威出版</p>
+    <div class="line"></div>
+  </div>
+  <div class="books-grid reveal">
+    <div class="book-card">
+      <div class="book-cover"><img src="images/book1.jpg" alt="人力资源数字化转型行动指南"></div>
+      <div class="book-info">
+        <h4>人力资源数字化转型行动指南</h4>
+        <p>系统阐述人力资源数字化转型的方法论与实践路径，为企业 HR 转型提供行动指引。</p>
+        <div class="publisher">机械工业出版社</div>
+      </div>
+    </div>
+    <div class="book-card">
+      <div class="book-cover"><img src="images/book2.jpg" alt="人力资源管理的未来"></div>
+      <div class="book-info">
+        <h4>人力资源管理的未来</h4>
+        <p>前瞻性地探讨人力资源管理的发展趋势与未来形态，为 HR 从业者打开全新视野。</p>
+        <div class="publisher">机械工业出版社</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 48px; text-align: center;" class="reveal">
+    <h3 style="font-size: 1.2rem; margin-bottom: 20px; color: var(--accent);">专业荣誉</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; text-align: left;">
+      <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 24px;">
+        <h4 style="font-size: 1rem; margin-bottom: 8px;">&#127942; 杂志领衔专家</h4>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">担任《人力资源》杂志领衔专家，多次在《人力资源》《企业管理》等核心期刊发表专业文章。</p>
+      </div>
+      <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 24px;">
+        <h4 style="font-size: 1rem; margin-bottom: 8px;">&#127942; 复旦 MBA 协会理事</h4>
+        <p style="color: var(--text-muted); font-size: 0.95rem;">复旦 MBA 人力资源协会常务理事，获复旦大学管理学院校友中心年度嘉奖。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Experience -->
+<section class="section" id="experience" style="background: rgba(30,58,95,0.15);">
+  <div class="section-title reveal">
+    <h2>活动与经验</h2>
+    <p>丰富的培训、分享与组织经验</p>
+    <div class="line"></div>
+  </div>
+  <div class="exp-timeline reveal">
+    <div class="exp-item">
+      <h4>企业培训与咨询服务</h4>
+      <p>成功为知名企业提供 AI + 人力资源数智化相关的培训、工作坊和轻咨询服务，获得客户一致好评。</p>
+    </div>
+    <div class="exp-item">
+      <h4>人力资源论坛分享嘉宾</h4>
+      <p>多次作为分享嘉宾在各大人力资源论坛中发表演讲，分享数智化转型实战经验与前沿洞察。</p>
+    </div>
+    <div class="exp-item">
+      <h4>"HR大咖邀一邀"品牌活动</h4>
+      <p>在复旦 MBA 人力资源协会打造知名品牌活动，累计举办 11 期，通过线上 + 线下为 HR 赋能。</p>
+    </div>
+    <div class="exp-item">
+      <h4>深蓝君邀请下午茶</h4>
+      <p>独立组织 4 次主题活动（两次出海主题、两次 HR 数智化主题），以 HR 共创交流形式举办，获到场 HR 一致好评。</p>
+    </div>
+  </div>
+</section>
+
+<!-- QR Codes -->
+<section class="section qr-section" id="follow">
+  <div class="section-title reveal">
+    <h2>关注我们</h2>
+    <p>扫码关注深蓝信息，获取最新人力资源数智化资讯</p>
+    <div class="line"></div>
+  </div>
+  <div class="qr-grid reveal">
+    <div class="qr-card">
+      <img src="images/qrcode_gzh.jpg" alt="深蓝信息公众号">
+      <h4>深蓝信息公众号</h4>
+      <p>深度文章与行业洞察</p>
+    </div>
+    <div class="qr-card">
+      <img src="images/qrcode_video.png" alt="深蓝信息视频号">
+      <h4>深蓝信息视频号</h4>
+      <p>短视频干货与趋势解读</p>
+    </div>
+  </div>
+</section>
+
+<!-- Toolbox -->
+<section class="section toolbox-section" id="toolbox">
+  <div class="section-title reveal">
+    <h2>深蓝HR工具箱</h2>
+    <p>为 HR 从业者打造的实用计算工具</p>
+    <div class="line"></div>
+  </div>
+  <div class="toolbox-grid reveal">
+    <div class="toolbox-info">
+      <h3>HR 日常工作的得力助手</h3>
+      <p>深蓝HR工具箱是一款专为 HR 从业者设计的微信小程序，集成多种常用计算工具，帮助 HR 高效处理日常事务。</p>
+      <div class="toolbox-tools">
+        <div class="toolbox-tool">HR 配比计算器</div>
+        <div class="toolbox-tool">退休年月计算器</div>
+        <div class="toolbox-tool">个税正反算计算器</div>
+        <div class="toolbox-tool">离职补偿金计算器</div>
+        <div class="toolbox-tool">辩论专用计时器</div>
+      </div>
+      <p style="font-size: 0.9rem; color: var(--text-muted);">微信扫码或搜索"深蓝HR工具箱"即可使用</p>
+    </div>
+    <div class="toolbox-qr">
+      <img src="images/qrcode_toolbox.png" alt="深蓝HR工具箱小程序">
+      <p>扫码打开小程序</p>
+    </div>
+  </div>
+</section>
+
+<!-- Contact -->
+<section class="section contact-section" id="contact">
+  <div class="section-title reveal">
+    <h2>联系我</h2>
+    <p>期待与你交流人力资源数智化的无限可能</p>
+    <div class="line"></div>
+  </div>
+  <div class="contact-grid reveal">
+    <div class="contact-item">
+      <div class="contact-icon">&#9993;</div>
+      <h4>电子邮箱</h4>
+      <a href="mailto:xugangandrew@163.com">xugangandrew@163.com</a>
+    </div>
+    <div class="contact-item">
+      <div class="contact-icon">&#128172;</div>
+      <h4>个人微信</h4>
+      <p style="font-size: 0.95rem; margin-top: 4px;">个人微信: deepblueinfo1</p>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-brand">深蓝<span style="color: var(--accent);">信息</span></div>
+  <p>人力资源数智化专家 | AI + HR 跨界实践者</p>
+  <p style="margin-top: 12px; font-size: 0.85rem;">&copy; 2026 深蓝信息. All rights reserved.</p>
+  <p style="margin-top: 8px; font-size: 0.8rem;"><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener" style="color: var(--text-muted); text-decoration: none;">沪ICP备18002103号-1</a></p>
+</footer>
+
+<script>
+// Scroll reveal animation
+const reveals = document.querySelectorAll('.reveal');
+const revealOnScroll = () => {
+  reveals.forEach(el => {
+    const top = el.getBoundingClientRect().top;
+    if (top < window.innerHeight - 80) el.classList.add('active');
+  });
+};
+window.addEventListener('scroll', revealOnScroll);
+revealOnScroll();
+
+// Active nav link
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('.nav a');
+
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(section => {
+    const top = section.offsetTop - 100;
+    if (scrollY >= top) current = section.getAttribute('id');
+  });
+  navLinks.forEach(link => {
+    link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+  });
+});
+
+// Mobile menu toggle
+const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+const nav = document.getElementById('nav');
+mobileMenuBtn.addEventListener('click', () => {
+  nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
+  nav.style.position = 'absolute';
+  nav.style.top = '64px';
+  nav.style.left = '0';
+  nav.style.right = '0';
+  nav.style.flexDirection = 'column';
+  nav.style.background = 'rgba(10,22,40,0.98)';
+  nav.style.padding = '20px';
+  nav.style.gap = '16px';
+});
+</script>
+
+</body>
+</html>
