@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>投票工具 - 深蓝信息</title>
+<meta name="description" content="深蓝信息投票工具">
+<link rel="icon" type="image/x-icon" href="images/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', sans-serif;
+  background: #0a1628;
+  color: #f0f4f8;
+  line-height: 1.8;
+  overflow-x: hidden;
+}
+
+/* Header */
+.header {
+  position: fixed; top: 0; left: 0; right: 0;
+  background: rgba(10, 22, 40, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.header-inner {
+  max-width: 1200px; margin: 0 auto;
+  padding: 0 24px;
+  display: flex; justify-content: space-between; align-items: center;
+  height: 64px;
+}
+
+.logo {
+  font-size: 1.4rem; font-weight: 700;
+  color: #f0f4f8;
+  letter-spacing: 2px;
+}
+
+.logo span { color: #5ba8e6; }
+
+.nav { display: flex; gap: 32px; }
+
+.nav a {
+  color: #94a3b8; text-decoration: none;
+  font-size: 0.95rem; font-weight: 500;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+.nav a:hover, .nav a.active { color: #f0f4f8; }
+
+.nav a::after {
+  content: ''; position: absolute; bottom: -4px; left: 0;
+  width: 0; height: 2px; background: #5ba8e6;
+  transition: width 0.3s ease;
+}
+
+.nav a:hover::after, .nav a.active::after { width: 100%; }
+
+.mobile-menu-btn {
+  display: none; background: none; border: none;
+  color: #f0f4f8; font-size: 1.5rem; cursor: pointer;
+}
+
+/* Iframe container */
+.iframe-container {
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: calc(100vh - 64px);
+  border: none;
+  overflow: hidden;
+}
+
+.iframe-container iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  display: block;
+}
+
+.mobile-menu-btn {
+  display: none; background: none; border: none;
+  color: #f0f4f8; font-size: 1.5rem; cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .nav { display: none; }
+  .mobile-menu-btn { display: block; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="logo" style="cursor:pointer;" onclick="window.location.href='index.html'">深蓝<span>信息</span></div>
+    <nav class="nav">
+      <a href="index.html">首页</a>
+      <a href="AICompetencyAssess.html">AI胜任力</a>
+      <a href="voting.html" style="color:#f0f4f8;">投票工具</a>
+    </nav>
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="菜单">&#9776;</button>
+  </div>
+</header>
+
+<div class="iframe-container">
+  <iframe
+    src="https://app-by8qzosjykn5.appmiaoda.com"
+    title="投票工具"
+    allow="fullscreen; camera; microphone; geolocation"
+    sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-downloads"
+    loading="eager"
+    importance="high"
+  ></iframe>
+</div>
+
+<script>
+// Mobile menu toggle
+const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+mobileMenuBtn.addEventListener('click', () => {
+  alert('请使用桌面浏览器获得最佳体验');
+});
+</script>
+
+</body>
+</html>

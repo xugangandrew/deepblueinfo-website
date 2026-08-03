@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>加入深蓝 - 深蓝信息招聘</title>
+<meta name="description" content="加入深蓝信息，与人力资源数智化专家一起，用AI赋能HR，共创未来。">
+<link rel="icon" type="image/x-icon" href="images/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<style>
+:root {
+  --primary: #0a1628;
+  --primary-light: #1e3a5f;
+  --accent: #5ba8e6;
+  --accent-light: #8ecaf7;
+  --text: #f0f4f8;
+  --text-muted: #94a3b8;
+  --bg: #0a1628;
+  --card-bg: rgba(30, 58, 95, 0.4);
+  --border: rgba(148, 163, 184, 0.15);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.8;
+  overflow-x: hidden;
+}
+
+/* Header */
+.header {
+  position: fixed; top: 0; left: 0; right: 0;
+  background: rgba(10, 22, 40, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  z-index: 1000;
+  transition: all 0.3s ease;
+}
+
+.header-inner {
+  max-width: 1200px; margin: 0 auto;
+  padding: 0 24px;
+  display: flex; justify-content: space-between; align-items: center;
+  height: 64px;
+}
+
+.logo {
+  font-size: 1.4rem; font-weight: 700;
+  color: var(--text);
+  letter-spacing: 2px;
+  text-decoration: none;
+}
+
+.logo span { color: var(--accent); }
+
+.nav { display: flex; gap: 32px; }
+
+.nav a {
+  color: var(--text-muted); text-decoration: none;
+  font-size: 0.95rem; font-weight: 500;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+.nav a:hover, .nav a.active { color: var(--text); }
+
+.nav a::after {
+  content: ''; position: absolute; bottom: -4px; left: 0;
+  width: 0; height: 2px; background: var(--accent);
+  transition: width 0.3s ease;
+}
+
+.nav a:hover::after, .nav a.active::after { width: 100%; }
+
+.mobile-menu-btn {
+  display: none; background: none; border: none;
+  color: var(--text); font-size: 1.5rem; cursor: pointer;
+}
+
+/* Hero */
+.hero {
+  min-height: 70vh;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center;
+  padding: 100px 24px 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(30, 58, 95, 0.4) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(91, 168, 230, 0.08) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.hero-content { position: relative; z-index: 1; max-width: 800px; }
+
+.hero-badge {
+  display: inline-block;
+  padding: 6px 20px;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-size: 0.85rem; font-weight: 500;
+  border-radius: 30px; letter-spacing: 2px;
+  margin-bottom: 28px;
+}
+
+.hero h1 {
+  font-size: clamp(2.2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+
+.hero h1 span { color: var(--accent); }
+
+.hero-subtitle {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  color: var(--text-muted);
+  margin-bottom: 40px;
+  max-width: 600px; margin-left: auto; margin-right: auto;
+}
+
+.hero-cta {
+  display: inline-flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+}
+
+.btn {
+  padding: 14px 36px;
+  border-radius: 8px;
+  font-size: 1rem; font-weight: 600;
+  cursor: pointer; transition: all 0.3s ease;
+  text-decoration: none; border: none;
+  display: inline-block;
+}
+
+.btn-primary {
+  background: var(--accent); color: var(--primary);
+}
+
+.btn-primary:hover {
+  background: var(--accent-light);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(91, 168, 230, 0.3);
+}
+
+.btn-outline {
+  background: transparent; color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.btn-outline:hover {
+  border-color: var(--accent); color: var(--accent);
+}
+
+/* Section */
+.section {
+  padding: 100px 24px;
+  max-width: 1100px; margin: 0 auto;
+}
+
+.section-title {
+  text-align: center; margin-bottom: 60px;
+}
+
+.section-title h2 {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 700; margin-bottom: 12px;
+}
+
+.section-title p {
+  color: var(--text-muted); font-size: 1.05rem;
+  max-width: 600px; margin: 0 auto;
+}
+
+.section-title .line {
+  width: 60px; height: 3px; background: var(--accent);
+  margin: 16px auto 0; border-radius: 2px;
+}
+
+/* Mission */
+.mission-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+.mission-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px 32px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.mission-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(91, 168, 230, 0.3);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+}
+
+.mission-icon {
+  font-size: 2.5rem; margin-bottom: 20px;
+}
+
+.mission-card h3 {
+  font-size: 1.2rem; margin-bottom: 12px;
+  color: var(--text);
+}
+
+.mission-card p {
+  color: var(--text-muted); font-size: 0.95rem; line-height: 1.8;
+}
+
+/* Why Us */
+.why-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.why-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  transition: all 0.3s ease;
+}
+
+.why-card:hover {
+  border-color: rgba(91, 168, 230, 0.3);
+  transform: translateY(-2px);
+}
+
+.why-icon {
+  font-size: 2rem; flex-shrink: 0;
+  width: 56px; height: 56px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(91, 168, 230, 0.1);
+  border-radius: 12px;
+}
+
+.why-content h3 {
+  font-size: 1.15rem; margin-bottom: 8px;
+}
+
+.why-content p {
+  color: var(--text-muted); font-size: 0.95rem; line-height: 1.7;
+}
+
+/* Culture */
+.culture-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.culture-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px 24px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.culture-card:hover {
+  border-color: rgba(91, 168, 230, 0.3);
+}
+
+.culture-card .culture-icon {
+  font-size: 2.2rem; margin-bottom: 16px;
+}
+
+.culture-card h4 {
+  font-size: 1.1rem; margin-bottom: 10px;
+}
+
+.culture-card p {
+  color: var(--text-muted); font-size: 0.9rem; line-height: 1.7;
+}
+
+/* Benefits */
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.benefit-item {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: all 0.3s ease;
+}
+
+.benefit-item:hover {
+  border-color: rgba(91, 168, 230, 0.3);
+}
+
+.benefit-icon {
+  font-size: 1.6rem; flex-shrink: 0;
+}
+
+.benefit-item span {
+  font-size: 0.95rem; color: var(--text);
+}
+
+/* Jobs */
+.job-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.job-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  transition: all 0.3s ease;
+}
+
+.job-card:hover {
+  border-color: rgba(91, 168, 230, 0.3);
+  transform: translateY(-2px);
+}
+
+.job-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.job-title {
+  font-size: 1.25rem; font-weight: 600;
+}
+
+.job-tags {
+  display: flex; gap: 10px; flex-wrap: wrap;
+}
+
+.job-tag {
+  padding: 4px 14px;
+  background: rgba(91, 168, 230, 0.1);
+  border: 1px solid rgba(91, 168, 230, 0.2);
+  border-radius: 20px;
+  font-size: 0.8rem;
+  color: var(--accent-light);
+}
+
+.job-desc {
+  color: var(--text-muted); font-size: 0.95rem;
+  line-height: 1.7; margin-bottom: 16px;
+}
+
+.job-requirements {
+  list-style: none;
+  margin-bottom: 20px;
+}
+
+.job-requirements li {
+  color: var(--text-muted); font-size: 0.9rem;
+  padding: 4px 0; padding-left: 20px;
+  position: relative;
+}
+
+.job-requirements li::before {
+  content: '';
+  position: absolute; left: 0; top: 14px;
+  width: 6px; height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+.job-apply-btn {
+  display: inline-block;
+  padding: 10px 28px;
+  background: var(--accent);
+  color: var(--primary);
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.job-apply-btn:hover {
+  background: var(--accent-light);
+  transform: translateY(-2px);
+}
+
+/* Apply Section */
+.apply-section {
+  text-align: center;
+  max-width: 700px; margin: 0 auto;
+}
+
+.apply-methods {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-top: 40px;
+}
+
+.apply-method {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 36px 28px;
+  transition: all 0.3s ease;
+}
+
+.apply-method:hover {
+  border-color: rgba(91, 168, 230, 0.3);
+}
+
+.apply-method .apply-icon {
+  font-size: 2.5rem; margin-bottom: 16px;
+}
+
+.apply-method h3 {
+  font-size: 1.15rem; margin-bottom: 10px;
+}
+
+.apply-method p {
+  color: var(--text-muted); font-size: 0.9rem;
+  margin-bottom: 16px;
+}
+
+.apply-method a {
+  color: var(--accent); text-decoration: none;
+  font-weight: 500;
+}
+
+.apply-method a:hover {
+  text-decoration: underline;
+}
+
+/* Footer */
+.footer {
+  text-align: center; padding: 60px 24px 40px;
+  border-top: 1px solid var(--border);
+}
+
+.footer-brand {
+  font-size: 1.3rem; font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.footer p {
+  color: var(--text-muted); font-size: 0.9rem;
+}
+
+.footer-links {
+  display: flex; justify-content: center; gap: 24px;
+  margin: 20px 0;
+  flex-wrap: wrap;
+}
+
+.footer-links a {
+  color: var(--text-muted); text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.3s ease;
+}
+
+.footer-links a:hover { color: var(--accent); }
+
+/* Reveal animation */
+.reveal {
+  opacity: 0; transform: translateY(40px);
+  transition: all 0.8s ease;
+}
+.reveal.active { opacity: 1; transform: translateY(0); }
+
+/* Responsive */
+@media (max-width: 900px) {
+  .mission-grid { grid-template-columns: repeat(2, 1fr); }
+  .why-grid { grid-template-columns: 1fr; }
+  .culture-grid { grid-template-columns: repeat(2, 1fr); }
+  .benefits-grid { grid-template-columns: repeat(2, 1fr); }
+  .apply-methods { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+  .mission-grid { grid-template-columns: 1fr; }
+  .culture-grid { grid-template-columns: 1fr; }
+  .benefits-grid { grid-template-columns: 1fr; }
+  .nav { display: none; }
+  .mobile-menu-btn { display: block; }
+  .section { padding: 60px 24px; }
+  .job-header { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header" id="header">
+  <div class="header-inner">
+    <a href="index.html" class="logo">深蓝<span>信息</span></a>
+    <nav class="nav" id="nav">
+      <a href="index.html">首页</a>
+      <a href="index.html#about">关于</a>
+      <a href="index.html#services">服务</a>
+      <a href="index.html#books">著作</a>
+      <a href="index.html#contact">联系</a>
+      <a href="careers.html" class="active">招聘</a>
+      <a href="AICompetencyAssess.html">AI胜任力</a>
+      <a href="voting.html">投票工具</a>
+    </nav>
+    <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="菜单">&#9776;</button>
+  </div>
+</header>
+
+<!-- Hero -->
+<section class="hero" id="hero">
+  <div class="hero-content">
+    <div class="hero-badge">JOIN US</div>
+    <h1>加入<span>深蓝信息</span></h1>
+    <p class="hero-subtitle">
+      与人力资源数智化领域的先行者一起，用AI赋能HR，共创数字化未来
+    </p>
+    <div class="hero-cta">
+      <a href="#jobs" class="btn btn-primary">查看开放职位</a>
+      <a href="#apply" class="btn btn-outline">投递简历</a>
+    </div>
+  </div>
+</section>
+
+<!-- Notice -->
+<section style="padding: 0 24px; max-width: 1100px; margin: -40px auto 0; position: relative; z-index: 2;">
+  <div style="background: rgba(91, 168, 230, 0.08); border: 1px solid rgba(91, 168, 230, 0.25); border-radius: 12px; padding: 20px 28px; display: flex; align-items: flex-start; gap: 14px;">
+    <span style="font-size: 1.3rem; flex-shrink: 0;">&#128712;</span>
+    <div>
+      <p style="color: var(--accent-light); font-size: 0.95rem; line-height: 1.7;">
+        <strong>声明：</strong>本招聘页面为虚拟展示用途，暂无实际招聘需求。如有培训、咨询、内容合作等业务相关需求，欢迎通过页面底部联系方式与我们取得联系。
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- Mission -->
+<section class="section" id="mission">
+  <div class="section-title reveal">
+    <h2>我们的使命</h2>
+    <p>用科技重新定义人力资源的价值</p>
+    <div class="line"></div>
+  </div>
+  <div class="mission-grid reveal">
+    <div class="mission-card">
+      <div class="mission-icon">&#128640;</div>
+      <h3>推动数智化转型</h3>
+      <p>帮助企业与HR专业人士拥抱AI与数字化工具，实现人力资源管理的智能化升级</p>
+    </div>
+    <div class="mission-card">
+      <div class="mission-icon">&#128161;</div>
+      <h3>传播前沿理念</h3>
+      <p>通过培训、咨询与内容输出，将最新的人力资源数智化理念传递给更多从业者</p>
+    </div>
+    <div class="mission-card">
+      <div class="mission-icon">&#129309;</div>
+      <h3>连接人与技术</h3>
+      <p>搭建HR与技术的桥梁，让技术真正服务于人，而非取代人</p>
+    </div>
+  </div>
+</section>
+
+<!-- Why Us -->
+<section class="section" id="why" style="background: rgba(30,58,95,0.15);">
+  <div class="section-title reveal">
+    <h2>为什么选择深蓝</h2>
+    <p>在这里，你将获得远超预期的成长与机会</p>
+    <div class="line"></div>
+  </div>
+  <div class="why-grid reveal">
+    <div class="why-card">
+      <div class="why-icon">&#129302;</div>
+      <div class="why-content">
+        <h3>AI+HR前沿领域</h3>
+        <p>深耕人力资源数智化赛道，站在AI与HR融合的最前沿，参与定义行业未来的产品与服务</p>
+      </div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">&#127793;</div>
+      <div class="why-content">
+        <h3>快速成长空间</h3>
+        <p>扁平化管理，直接与行业专家共事，获得500强企业级视野，个人能力指数级提升</p>
+      </div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">&#127758;</div>
+      <div class="why-content">
+        <h3>灵活工作方式</h3>
+        <p>支持远程办公与弹性工作时间，结果导向而非时间导向，平衡工作与生活</p>
+      </div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">&#127942;</div>
+      <div class="why-content">
+        <h3>行业影响力</h3>
+        <p>参与行业论坛、品牌活动与内容创作，建立个人在人力资源领域的专业影响力</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Culture -->
+<section class="section" id="culture">
+  <div class="section-title reveal">
+    <h2>企业文化</h2>
+    <p>我们相信，好的文化是最好的雇主品牌</p>
+    <div class="line"></div>
+  </div>
+  <div class="culture-grid reveal">
+    <div class="culture-card">
+      <div class="culture-icon">&#9889;</div>
+      <h4>追求卓越</h4>
+      <p>不满足于平庸，在每一个细节上追求专业与精进</p>
+    </div>
+    <div class="culture-card">
+      <div class="culture-icon">&#128214;</div>
+      <h4>持续学习</h4>
+      <p>保持好奇心与学习热情，与行业最前沿同步进化</p>
+    </div>
+    <div class="culture-card">
+      <div class="culture-icon">&#129309;</div>
+      <h4>开放协作</h4>
+      <p>扁平沟通，鼓励表达，每个人都是团队的重要组成部分</p>
+    </div>
+    <div class="culture-card">
+      <div class="culture-icon">&#127919;</div>
+      <h4>结果导向</h4>
+      <p>关注价值交付，用数据和结果说话，而非过程与加班时长</p>
+    </div>
+  </div>
+</section>
+
+<!-- Benefits -->
+<section class="section" id="benefits" style="background: rgba(30,58,95,0.15);">
+  <div class="section-title reveal">
+    <h2>福利待遇</h2>
+    <p>我们提供有竞争力的薪酬与全方位的关怀</p>
+    <div class="line"></div>
+  </div>
+  <div class="benefits-grid reveal">
+    <div class="benefit-item">
+      <div class="benefit-icon">&#128176;</div>
+      <span>具有竞争力的薪酬</span>
+    </div>
+    <div class="benefit-item">
+      <div class="benefit-icon">&#128719;</div>
+      <span>弹性工作时间</span>
+    </div>
+    <div class="benefit-item">
+      <div class="benefit-icon">&#127969;</div>
+      <span>远程办公支持</span>
+    </div>
+    <div class="benefit-item">
+      <div class="benefit-icon">&#128218;</div>
+      <span>培训与学习基金</span>
+    </div>
+    <div class="benefit-item">
+      <div class="benefit-icon">&#127874;</div>
+      <span>带薪年假</span>
+    </div>
+    <div class="benefit-item">
+      <div class="benefit-icon">&#128106;</div>
+      <span>节日福利</span>
+    </div>
+    <div class="benefit-item">
+      <div class="benefit-icon">&#128200;</div>
+      <span>绩效奖金</span>
+    </div>
+    <div class="benefit-item">
+      <div class="benefit-icon">&#128170;</div>
+      <span>年度体检</span>
+    </div>
+    <div class="benefit-item">
+      <div class="benefit-icon">&#127942;</div>
+      <span>项目分红</span>
+    </div>
+  </div>
+</section>
+
+<!-- Jobs -->
+<section class="section" id="jobs">
+  <div class="section-title reveal">
+    <h2>开放职位</h2>
+    <p>我们正在寻找志同道合的伙伴</p>
+    <div class="line"></div>
+  </div>
+  <div class="job-list reveal">
+    <div class="job-card">
+      <div class="job-header">
+        <div class="job-title">人力资源数智化顾问</div>
+        <div class="job-tags">
+          <span class="job-tag">全职</span>
+          <span class="job-tag">上海/远程</span>
+          <span class="job-tag">经验不限</span>
+        </div>
+      </div>
+      <div class="job-desc">
+        参与企业人力资源数智化咨询项目，协助客户梳理HR业务流程，设计数字化转型方案，推动AI工具在HR场景中的落地应用。
+      </div>
+      <ul class="job-requirements">
+        <li>对人力资源数字化、AI应用有浓厚兴趣</li>
+        <li>具备良好的沟通能力和逻辑思维</li>
+        <li>有HR或咨询相关背景优先</li>
+        <li>学习能力强，能够快速掌握新工具</li>
+      </ul>
+      <a href="mailto:xugangandrew@163.com?subject=应聘-人力资源数智化顾问" class="job-apply-btn">申请职位</a>
+    </div>
+
+    <div class="job-card">
+      <div class="job-header">
+        <div class="job-title">内容运营专员</div>
+        <div class="job-tags">
+          <span class="job-tag">全职/兼职</span>
+          <span class="job-tag">远程</span>
+          <span class="job-tag">1年以上</span>
+        </div>
+      </div>
+      <div class="job-desc">
+        负责深蓝信息公众号、视频号的内容策划与运营，包括选题策划、文章撰写、视频脚本、数据分析与粉丝互动。
+      </div>
+      <ul class="job-requirements">
+        <li>熟悉新媒体运营，有公众号/视频号运营经验</li>
+        <li>文字功底扎实，具备HR或科技领域知识储备</li>
+        <li>对短视频内容有敏感度，有脚本创作能力</li>
+        <li>能够使用AI工具辅助内容生产</li>
+      </ul>
+      <a href="mailto:xugangandrew@163.com?subject=应聘-内容运营专员" class="job-apply-btn">申请职位</a>
+    </div>
+
+    <div class="job-card">
+      <div class="job-header">
+        <div class="job-title">培训项目助理</div>
+        <div class="job-tags">
+          <span class="job-tag">兼职/项目制</span>
+          <span class="job-tag">上海</span>
+          <span class="job-tag">经验不限</span>
+        </div>
+      </div>
+      <div class="job-desc">
+        协助数智化培训项目的筹备与执行，包括学员管理、课程资料整理、现场支持、课后反馈收集与数据分析。
+      </div>
+      <ul class="job-requirements">
+        <li>细心负责，具备良好的组织协调能力</li>
+        <li>熟练使用Office办公软件及协作工具</li>
+        <li>对教育/培训行业有热情</li>
+        <li>能够适应不定期出差</li>
+      </ul>
+      <a href="mailto:xugangandrew@163.com?subject=应聘-培训项目助理" class="job-apply-btn">申请职位</a>
+    </div>
+
+    <div class="job-card">
+      <div class="job-header">
+        <div class="job-title">前端开发工程师（实习生）</div>
+        <div class="job-tags">
+          <span class="job-tag">实习</span>
+          <span class="job-tag">远程</span>
+          <span class="job-tag">在校生</span>
+        </div>
+      </div>
+      <div class="job-desc">
+        参与深蓝信息旗下产品（网站、小程序、工具）的前端开发与维护，协助优化用户体验，探索AI辅助开发的新工作流。
+      </div>
+      <ul class="job-requirements">
+        <li>熟悉HTML/CSS/JavaScript基础</li>
+        <li>对前端框架（React/Vue）有了解</li>
+        <li>对AI编程工具（如Claude Code）有兴趣</li>
+        <li>计算机相关专业在校生优先</li>
+      </ul>
+      <a href="mailto:xugangandrew@163.com?subject=应聘-前端开发实习生" class="job-apply-btn">申请职位</a>
+    </div>
+  </div>
+</section>
+
+<!-- Apply -->
+<section class="section" id="apply" style="background: rgba(30,58,95,0.15);">
+  <div class="section-title reveal">
+    <h2>加入我们</h2>
+    <p>我们期待与你在深蓝相遇</p>
+    <div class="line"></div>
+  </div>
+  <div class="apply-section reveal">
+    <p style="color: var(--text-muted); font-size: 1.05rem; line-height: 1.8;">
+      如果你对人力资源数智化充满热情，渴望在AI+HR的前沿领域快速成长，欢迎投递简历。我们会对每一份简历认真评估，并在3个工作日内给予反馈。
+    </p>
+    <div class="apply-methods">
+      <div class="apply-method">
+        <div class="apply-icon">&#128231;</div>
+        <h3>邮件投递</h3>
+        <p>发送简历至招聘邮箱</p>
+        <a href="mailto:xugangandrew@163.com?subject=应聘投递">xugangandrew@163.com</a>
+      </div>
+      <div class="apply-method">
+        <div class="apply-icon">&#128172;</div>
+        <h3>微信联系</h3>
+        <p>添加微信直接沟通</p>
+        <span style="color: var(--accent); font-weight: 500;">deepblueinfo1</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-brand">深蓝<span style="color: var(--accent);">信息</span></div>
+  <div class="footer-links">
+    <a href="index.html">首页</a>
+    <a href="index.html#about">关于</a>
+    <a href="index.html#services">服务</a>
+    <a href="index.html#books">著作</a>
+    <a href="careers.html">招聘</a>
+  </div>
+  <p>人力资源数智化专家 | AI + HR 跨界实践者</p>
+  <p style="margin-top: 12px; font-size: 0.85rem;">&copy; 2026 深蓝信息. All rights reserved.</p>
+</footer>
+
+<script>
+// Scroll reveal animation
+const reveals = document.querySelectorAll('.reveal');
+const revealOnScroll = () => {
+  reveals.forEach(el => {
+    const top = el.getBoundingClientRect().top;
+    if (top < window.innerHeight - 80) el.classList.add('active');
+  });
+};
+window.addEventListener('scroll', revealOnScroll);
+revealOnScroll();
+
+// Mobile menu toggle
+const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+const nav = document.getElementById('nav');
+mobileMenuBtn.addEventListener('click', () => {
+  nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
+  nav.style.position = 'absolute';
+  nav.style.top = '64px';
+  nav.style.left = '0';
+  nav.style.right = '0';
+  nav.style.flexDirection = 'column';
+  nav.style.background = 'rgba(10,22,40,0.98)';
+  nav.style.padding = '20px';
+  nav.style.gap = '16px';
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AI人才胜任力自评 · 深蓝君</title>
+<link rel="icon" type="image/x-icon" href="images/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<style>
+  :root{
+    --c1:#3fc9e0; --c2:#4a90d9; --c3:#7b8fd4;
+    --bg0:#0a1a3a; --bg1:#0e2452; --bg2:#153a6b;
+    --card:rgba(255,255,255,0.06); --cardb:rgba(255,255,255,0.12);
+    --txt:#eaf4ff; --sub:#a9c4e6; --muted:#7f9dc4;
+    --good:#3fc9e0; --mid:#5aa9e6; --warn:#f2a65a; --low:#e0708a;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",'Segoe UI',sans-serif;
+    color:var(--txt);
+    background:#0b1c3e;
+    min-height:100vh; overflow-x:hidden; position:relative;
+  }
+  /* 固定铺满视口的连续渐变背景层，滚动不产生接缝 */
+  body::before{
+    content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+    background:radial-gradient(1200px 900px at 18% 6%, #1c3f7a 0%, transparent 60%),
+              radial-gradient(1100px 800px at 95% 2%, #123a60 0%, transparent 55%),
+              linear-gradient(160deg,#0a1a3a 0%, #0e2452 55%, #153a6b 100%);
+  }
+  #bgcanvas{position:fixed; inset:0; z-index:0; pointer-events:none;}
+  .wrap{position:relative; z-index:1; max-width:860px; margin:0 auto; padding:28px 18px 60px;}
+  .glow{position:fixed; border-radius:50%; filter:blur(70px); opacity:.5; z-index:0; pointer-events:none; animation:float 14s ease-in-out infinite;}
+  .g1{width:340px;height:340px;background:#2f8fd0;top:-80px;left:-60px;}
+  .g2{width:300px;height:300px;background:#3fc9e0;bottom:-60px;right:-40px;animation-delay:-5s;}
+  @keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-30px)}}
+
+  .home-link{position:fixed; top:16px; left:18px; z-index:20; display:inline-flex; align-items:center; gap:6px;
+    font-size:13px; color:var(--sub); text-decoration:none; padding:6px 12px; border-radius:20px;
+    border:1px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.05); backdrop-filter:blur(6px);
+    transition:.25s;}
+  .home-link:hover{color:var(--txt); border-color:rgba(63,201,224,.5);}
+
+  /* screens */
+  .screen{display:none; animation:fade .5s ease both;}
+  .screen.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+  /* intro */
+  .badge{display:inline-block; font-size:12px; letter-spacing:2px; color:var(--c1);
+    border:1px solid rgba(63,201,224,.4); padding:5px 14px; border-radius:20px; margin-bottom:20px;
+    background:rgba(63,201,224,.08);}
+  h1{font-size:clamp(26px,6vw,42px); line-height:1.25; font-weight:800; letter-spacing:1px;}
+  h1 .hl{background:linear-gradient(90deg,var(--c1),#8fe6f2); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .lead{color:var(--sub); font-size:clamp(14px,2.4vw,17px); line-height:1.9; margin:18px 0 26px; max-width:640px;}
+  .model{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:22px 0 30px;}
+  .mcard{background:var(--card); border:1px solid var(--cardb); border-radius:14px; padding:16px 14px; transition:.3s;}
+  .mcard:hover{transform:translateY(-4px); border-color:rgba(63,201,224,.5); box-shadow:0 10px 30px rgba(0,0,0,.25);}
+  .mcard .tag{font-size:13px; font-weight:700; color:var(--c1); margin-bottom:10px;}
+  .mcard .dim{font-size:12.5px; color:var(--sub); line-height:2;}
+  .meta{display:flex; gap:22px; flex-wrap:wrap; color:var(--muted); font-size:13px; margin-bottom:26px;}
+  .meta b{color:var(--txt);}
+  .btn{cursor:pointer; border:none; border-radius:40px; font-weight:700; letter-spacing:1px;
+    padding:15px 40px; font-size:16px; color:#04203a;
+    background:linear-gradient(90deg,var(--c1),#6fdcec);
+    box-shadow:0 8px 26px rgba(63,201,224,.4); transition:.25s;}
+  .btn:hover{transform:translateY(-2px); box-shadow:0 12px 34px rgba(63,201,224,.55);}
+  .btn:active{transform:translateY(0);}
+  .btn.ghost{background:transparent; color:var(--sub); border:1px solid var(--cardb); box-shadow:none;}
+
+  /* quiz */
+  .qtop{display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; gap:14px;}
+  .qcount{font-size:13px; color:var(--muted);} .qcount b{color:var(--c1); font-size:20px;}
+  .bar{flex:1; height:8px; background:rgba(255,255,255,.08); border-radius:10px; overflow:hidden;}
+  .bar>span{display:block; height:100%; width:0; border-radius:10px;
+    background:linear-gradient(90deg,var(--c1),var(--c2)); transition:width .4s ease;}
+  .qcat{font-size:12px; letter-spacing:1px; color:var(--c1); margin-bottom:8px; font-weight:700;}
+  .qcard{background:var(--card); border:1px solid var(--cardb); border-radius:20px; padding:26px 22px;
+    backdrop-filter:blur(6px); min-height:150px;}
+  .qtext{font-size:clamp(17px,3vw,21px); line-height:1.7; font-weight:600; margin-bottom:22px;}
+  .opts{display:flex; flex-direction:column; gap:11px;}
+  .opt{cursor:pointer; text-align:left; border:1px solid var(--cardb); background:rgba(255,255,255,.03);
+    color:var(--txt); border-radius:13px; padding:14px 16px; font-size:15px; transition:.2s;
+    display:flex; align-items:center; gap:13px;}
+  .opt:hover{border-color:rgba(63,201,224,.6); background:rgba(63,201,224,.08); transform:translateX(3px);}
+  .opt .dot{width:20px; height:20px; border-radius:50%; border:2px solid var(--muted); flex:none; transition:.2s;}
+  .opt.sel{border-color:var(--c1); background:rgba(63,201,224,.16);}
+  .opt.sel .dot{border-color:var(--c1); background:var(--c1); box-shadow:0 0 0 4px rgba(63,201,224,.2);}
+  .qnav{display:flex; justify-content:space-between; margin-top:22px; gap:12px;}
+
+  /* result */
+  .rhero{text-align:center; margin-bottom:8px;}
+  .ring{position:relative; width:190px; height:190px; margin:6px auto 10px;}
+  .ring svg{transform:rotate(-90deg);}
+  .ring .num{position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center;}
+  .ring .num b{font-size:46px; font-weight:800; line-height:1;
+    background:linear-gradient(90deg,var(--c1),#8fe6f2); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .ring .num span{font-size:12px; color:var(--muted); margin-top:6px; letter-spacing:1px;}
+  .rlevel{font-size:20px; font-weight:800; letter-spacing:1px;}
+  .rdesc{color:var(--sub); font-size:14.5px; line-height:1.9; max-width:600px; margin:12px auto 26px;}
+  .chartbox{background:var(--card); border:1px solid var(--cardb); border-radius:20px; padding:20px 14px 8px; margin-bottom:26px;}
+  .radarwrap{width:100%; max-width:460px; margin:0 auto;}
+  .radarwrap svg{width:100%; height:auto; display:block; overflow:visible;}
+  .radar-poly{transform-origin:center; transform-box:fill-box; animation:grow 1s cubic-bezier(.2,.8,.2,1) both;}
+  @keyframes grow{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+  .radar-dot{opacity:0; animation:pop .4s ease forwards;}
+  @keyframes pop{to{opacity:1}}
+  .chartbox h3, .block h3{font-size:16px; margin-bottom:6px; letter-spacing:1px;}
+  .chartbox .cap{color:var(--muted); font-size:12.5px; margin-bottom:8px;}
+  .cats{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:26px;}
+  .catc{background:var(--card); border:1px solid var(--cardb); border-radius:16px; padding:18px 14px; text-align:center;}
+  .catc .cn{font-size:14px; color:var(--sub); margin-bottom:8px; font-weight:700;}
+  .catc .cs{font-size:34px; font-weight:800;}
+  .catc .cl{font-size:12px; margin-top:6px; padding:3px 10px; border-radius:20px; display:inline-block;}
+  .block{margin-bottom:26px;}
+  .dgrid{display:flex; flex-direction:column; gap:14px;}
+  .drow{background:var(--card); border:1px solid var(--cardb); border-radius:16px; padding:16px 18px;}
+  .drow .dh{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:9px;}
+  .drow .dn{font-weight:700; font-size:15.5px;}
+  .drow .dn small{color:var(--muted); font-weight:400; margin-left:8px; font-size:12px;}
+  .drow .dv{font-weight:800; font-size:18px;}
+  .drow .track{height:9px; background:rgba(255,255,255,.08); border-radius:8px; overflow:hidden; margin-bottom:11px;}
+  .drow .track>span{display:block; height:100%; width:0; border-radius:8px; transition:width 1s ease;}
+  .drow .adv{font-size:13.5px; line-height:1.85; color:var(--sub);}
+  .drow .adv .lab{display:inline-block; font-size:11px; font-weight:700; padding:2px 9px; border-radius:12px; margin-right:8px; vertical-align:middle;}
+  .rfoot{display:flex; gap:12px; justify-content:center; margin:10px 0 30px; flex-wrap:wrap;}
+
+  /* 结果图片弹层 */
+  .modal{position:fixed; inset:0; z-index:50; background:rgba(4,12,28,.85); backdrop-filter:blur(4px);
+    display:none; align-items:flex-start; justify-content:center; overflow:auto; padding:20px 14px;}
+  .modal.show{display:flex; animation:fade .3s ease both;}
+  .modalbox{max-width:520px; width:100%; margin:auto;}
+  .mhint{color:#cfe6ff; font-size:13.5px; line-height:1.7; text-align:center; margin-bottom:14px;
+    background:rgba(63,201,224,.12); border:1px solid rgba(63,201,224,.3); border-radius:12px; padding:10px 14px;}
+  .mimg{border-radius:14px; overflow:hidden; box-shadow:0 12px 40px rgba(0,0,0,.5);}
+  .mimg img{width:100%; height:auto; display:block; -webkit-touch-callout:default;}
+  .mbtns{display:flex; gap:12px; justify-content:center; margin:16px 0 30px; flex-wrap:wrap;}
+  .mbtns .btn{text-decoration:none; display:inline-block;}
+
+  .copyright{margin-top:30px; padding-top:20px; border-top:1px solid rgba(255,255,255,.08);
+    text-align:center; color:var(--muted); font-size:12px; line-height:2;}
+  .copyright b{color:var(--sub);}
+  @media(max-width:600px){
+    .model,.cats{grid-template-columns:1fr;}
+    .wrap{padding:20px 14px 50px;}
+    .qcard{padding:22px 16px;}
+    .btn{padding:14px 30px; font-size:15px;}
+  }
+  /* ===== 打印 / 另存为PDF:强制保留深蓝背景与配色 ===== */
+  @media print{
+    *{ -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+    html,body{ background:#0e2452 !important; }
+    body{ background:linear-gradient(160deg,#0a1a3a,#0e2452 55%,#153a6b) !important; }
+    body::before{ display:none !important; }
+    #bgcanvas,.glow{ display:none !important; }
+    .wrap{ max-width:100% !important; }
+    /* 渐变裁剪文字在打印时会透明,改为实色以保证可见 */
+    .ring .num b, h1 .hl{ -webkit-text-fill-color:#3fc9e0 !important; color:#3fc9e0 !important; background:none !important; }
+    /* 隐藏交互按钮,输出更干净 */
+    .btn,.qnav,.rfoot{ display:none !important; }
+    /* 避免卡片被跨页截断 */
+    .drow,.catc,.chartbox,.mcard,.rhero{ break-inside:avoid; page-break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+<canvas id="bgcanvas"></canvas>
+<div class="glow g1"></div><div class="glow g2"></div>
+<a href="index.html" class="home-link">&larr; 返回首页</a>
+
+<div class="wrap">
+
+  <!-- ===== INTRO ===== -->
+  <section id="intro" class="screen active">
+    <span class="badge">AI 人才胜任力模型 · 自评测试</span>
+    <h1>你,准备好成为<br><span class="hl">AI 时代的人才</span>了吗?</h1>
+    <p class="lead">本测评基于「三层九维」AI人才胜任力模型,通过 27 道贴近真实工作的情景题,帮你在 3~5 分钟内看清自己在<b style="color:#cfe6ff">顶层策略、中层执行、底层心智</b>三大维度上的能力分布,并获得针对性的成长建议。</p>
+
+    <div class="model">
+      <div class="mcard"><div class="tag">顶层策略</div><div class="dim">业务洞察能力<br>问题转化能力<br>流程重构能力</div></div>
+      <div class="mcard"><div class="tag">中层执行</div><div class="dim">数据分析能力<br>人机协同能力<br>结果验证能力</div></div>
+      <div class="mcard"><div class="tag">底层心智</div><div class="dim">持续学习能力<br>判断与责任能力<br>合规安全能力</div></div>
+    </div>
+
+    <div class="meta"><span>📝 <b>27</b> 道情景题</span><span>⏱ 约 <b>3~5</b> 分钟</span><span>📊 <b>9</b> 维度雷达分析</span><span>💡 个性化建议</span></div>
+    <button class="btn" onclick="start()">开始测评 →</button>
+  </section>
+
+  <!-- ===== QUIZ ===== -->
+  <section id="quiz" class="screen">
+    <div class="qtop">
+      <span class="qcount"><b id="qnow">1</b> / 27</span>
+      <div class="bar"><span id="qbar"></span></div>
+    </div>
+    <div class="qcard">
+      <div class="qcat" id="qcat"></div>
+      <div class="qtext" id="qtext"></div>
+      <div class="opts" id="opts"></div>
+    </div>
+    <div class="qnav">
+      <button class="btn ghost" id="prevBtn" onclick="prev()">← 上一题</button>
+      <button class="btn ghost" onclick="restart()">重新开始</button>
+    </div>
+  </section>
+
+  <!-- ===== RESULT ===== -->
+  <section id="result" class="screen">
+    <div class="rhero">
+      <div class="ring">
+        <svg width="190" height="190" viewBox="0 0 190 190">
+          <circle cx="95" cy="95" r="82" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="12"/>
+          <circle id="ringP" cx="95" cy="95" r="82" fill="none" stroke="url(#gg)" stroke-width="12" stroke-linecap="round" stroke-dasharray="515" stroke-dashoffset="515"/>
+          <defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3fc9e0"/><stop offset="1" stop-color="#5aa9e6"/></linearGradient></defs>
+        </svg>
+        <div class="num"><b id="totScore">0</b><span>综合得分</span></div>
+      </div>
+      <div class="rlevel" id="totLevel"></div>
+      <p class="rdesc" id="totDesc"></p>
+    </div>
+
+    <div class="chartbox">
+      <h3>九维能力雷达</h3>
+      <div class="cap">数值为各维度达成率(0~100%),越靠外圈能力越强</div>
+      <div id="radarWrap" class="radarwrap"></div>
+    </div>
+
+    <h3 style="margin-bottom:12px; letter-spacing:1px;">三大分类概览</h3>
+    <div class="cats" id="cats"></div>
+
+    <div class="block">
+      <h3 style="margin-bottom:6px;">九维度详解与建议</h3>
+      <div class="cap" style="color:var(--muted); font-size:12.5px; margin-bottom:14px;">按当前得分给出针对性成长方向</div>
+      <div class="dgrid" id="dgrid"></div>
+    </div>
+
+    <div class="rfoot">
+      <button class="btn" onclick="restart()">再测一次</button>
+      <button class="btn" id="imgBtn" onclick="saveImage()">保存结果图片</button>
+      <button class="btn ghost" id="printBtn" onclick="printRes()">打印 / 另存为PDF</button>
+    </div>
+  </section>
+
+  <!-- 结果图片弹层：手机长按保存 -->
+  <div id="imgModal" class="modal">
+    <div class="modalbox">
+      <div class="mhint">长按下方图片即可保存到相册(iPhone / 安卓通用),或点击「下载图片」</div>
+      <div class="mimg"><img id="imgOut" alt="AI人才胜任力自评结果"></div>
+      <div class="mbtns">
+        <a id="imgDl" class="btn" download="AI人才胜任力自评结果.png">下载图片</a>
+        <button class="btn ghost" onclick="closeModal()">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="copyright">
+    版权所有 © <b>深蓝君管理咨询(上海)有限公司</b><br>
+    作者:徐刚(深蓝君) · 联系微信号:<b>deepblueinfo1</b>
+  </div>
+</div>
+
+<script>
+/* ================= 题库数据 ================= */
+// r:true 表示反向计分题(总是=1分, 从不=5分)
+const CATS = {
+  strat:{name:"顶层策略", color:"#3fc9e0"},
+  exec:{name:"中层执行", color:"#5aa9e6"},
+  mind:{name:"底层心智", color:"#7b8fd4"}
+};
+const DIMS = [
+  {id:"insight", cat:"strat", name:"业务洞察能力", note:"知道真正要解决什么问题"},
+  {id:"convert", cat:"strat", name:"问题转化能力", note:"把业务问题拆成AI可执行的任务"},
+  {id:"redesign",cat:"strat", name:"流程重构能力", note:"用AI重新设计工作方式"},
+  {id:"data",    cat:"exec",  name:"数据分析能力", note:"收集清洗分析解读数据"},
+  {id:"collab",  cat:"exec",  name:"人机协同能力", note:"选对工具、人机配合完成任务"},
+  {id:"verify",  cat:"exec",  name:"结果验证能力", note:"判断AI输出是否准确可靠可用"},
+  {id:"learn",   cat:"mind",  name:"持续学习能力", note:"保持好奇、持续试错更新"},
+  {id:"judge",   cat:"mind",  name:"判断与责任能力", note:"不迷信AI,知道何时质疑与拍板"},
+  {id:"safe",    cat:"mind",  name:"合规安全能力", note:"保护企业资产、规避合规陷阱"}
+];
+const QS = [
+  // 业务洞察
+  {d:"insight", t:"接到一个业务难题时,在动手用AI之前,我会先追问「这背后真正要解决的问题是什么」。"},
+  {d:"insight", t:"我能分辨哪些业务痛点适合用AI解决,哪些其实并不适合。"},
+  {d:"insight", t:"我容易被AI的新功能吸引,而忽略它是否真能解决业务问题。", r:true},
+  // 问题转化
+  {d:"convert", t:"我能把一个笼统的业务需求,拆解成AI可以逐步执行的具体任务。"},
+  {d:"convert", t:"当AI一次做不好复杂任务时,我会把它拆成更小的步骤分别处理。"},
+  {d:"convert", t:"我常直接把一个大而模糊的需求整个丢给AI,期待它一次给出完美结果。", r:true},
+  // 流程重构
+  {d:"redesign", t:"我不满足于用AI替代单个步骤,而会思考如何用AI重新设计整个流程。"},
+  {d:"redesign", t:"引入AI之后,我会主动调整团队的分工与协作方式。"},
+  {d:"redesign", t:"我会识别流程中被AI改变后可以取消或合并的环节。"},
+  // 数据分析
+  {d:"data", t:"拿到一堆原始数据,我能完成清洗、整理并从中提炼有用信息。"},
+  {d:"data", t:"我能借助工具对数据进行分析,并解读结果背后的业务含义。"},
+  {d:"data", t:"我会判断数据本身的质量和代表性,而不是照单全收。"},
+  // 人机协同
+  {d:"collab", t:"面对不同任务,我能选择合适的AI工具,而不是只会用一种。"},
+  {d:"collab", t:"我会通过多轮对话、逐步反馈来引导AI产出更好的结果。"},
+  {d:"collab", t:"我清楚哪些环节交给AI、哪些环节由自己把控,效率最高。"},
+  // 结果验证
+  {d:"verify", t:"对AI给出的结果,我会先核实其准确性再使用。"},
+  {d:"verify", t:"我能识别AI输出中的事实错误、逻辑漏洞或「一本正经的胡说」。"},
+  {d:"verify", t:"我倾向于直接采用AI给出的答案,很少再去核对。", r:true},
+  // 持续学习
+  {d:"learn", t:"我会主动尝试新出现的AI工具和用法。"},
+  {d:"learn", t:"我保持对AI领域变化的关注,持续更新自己的认知。"},
+  {d:"learn", t:"遇到不会用的AI功能,我会通过试错和查资料自己搞定。"},
+  // 判断与责任
+  {d:"judge", t:"重要决策上,我清楚哪些必须由人来拍板,而不能交给AI。"},
+  {d:"judge", t:"对使用AI产出的结果,我愿意承担最终责任。"},
+  {d:"judge", t:"当AI给出结论时,我往往会默认它是对的。", r:true},
+  // 合规安全
+  {d:"safe", t:"使用AI时,我会注意不泄露公司敏感或涉密信息。"},
+  {d:"safe", t:"我了解并遵守数据隐私、版权等相关合规要求。"},
+  {d:"safe", t:"为了图方便,我有时会把公司内部资料直接粘贴给AI工具。", r:true}
+];
+const SCALE = [
+  {t:"从不 / 完全不符合", v:1},
+  {t:"偶尔", v:2},
+  {t:"有时", v:3},
+  {t:"经常", v:4},
+  {t:"总是 / 完全符合", v:5}
+];
+
+/* 每维度的建议文案(高分优势 / 低分建议) */
+const ADVICE = {
+  insight:{hi:"你能穿透表象抓住真问题,让AI用在刀刃上。继续培养从业务价值倒推技术选型的习惯。",
+           lo:"多问一句「这到底要解决什么」。上手工具前,先用一句话写清业务目标与成功标准,避免为用AI而用AI。"},
+  convert:{hi:"你擅长把模糊需求翻译成可执行任务,这是驾驭AI的核心。可进一步沉淀你的拆解模板。",
+           lo:"练习「任务拆解」:把大需求拆成输入—步骤—输出,复杂任务分步喂给AI,而非期待一次到位。"},
+  redesign:{hi:"你已跳出「替代单步」,在用AI重构流程与协作,这是组织级价值所在。",
+            lo:"尝试画出现有流程图,标出哪些环节可被AI改造、合并或取消,从「优化一步」升级到「重设全程」。"},
+  data:{hi:"你具备扎实的数据素养,能让AI基于可靠数据工作。可尝试建立数据质量检查清单。",
+        lo:"补强数据基本功:学习清洗、整理与解读,并养成质疑数据来源与代表性的习惯。"},
+  collab:{hi:"你懂得因任务选工具、以多轮反馈驯服AI,协同效率很高。",
+          lo:"扩展你的工具箱,练习通过追问、给示例、分步反馈来引导AI;明确哪些交给AI、哪些自己把控。"},
+  verify:{hi:"你对AI输出保持健康的审慎,能识别幻觉与漏洞,交付质量有保障。",
+          lo:"建立「先验证再采用」的默认动作:核对关键事实、检查逻辑,警惕看似专业实则编造的内容。"},
+  learn:{hi:"你保持旺盛的好奇心与试错精神,能持续跟上AI的快速演进。",
+         lo:"给自己设定固定的学习节奏:定期尝试新工具、关注行业动态,把「不会」变成「试试看」。"},
+  judge:{hi:"你不迷信AI,清楚何时采纳、何时质疑、何时由人拍板,并敢于担责。",
+         lo:"强化独立判断:重要决策由人把关,把AI当参谋而非裁判,并对结果承担最终责任。"},
+  safe:{hi:"你有清晰的合规与安全边界,能在用好AI的同时保护企业资产。",
+        lo:"补上合规这一课:不向AI泄露敏感信息,了解数据隐私与版权要求,评估应用中的合规风险。"}
+};
+
+/* 等级 */
+function levelOf(p){
+  if(p>=80) return {t:"领先型", c:"var(--good)", d:"该项能力突出,已具备示范与带动他人的水平。"};
+  if(p>=60) return {t:"胜任型", c:"var(--mid)", d:"该项能力稳固,能独立胜任大多数场景。"};
+  if(p>=40) return {t:"发展型", c:"var(--warn)", d:"该项能力初步具备,尚有明显提升空间。"};
+  return {t:"起步型", c:"var(--low)", d:"该项能力较薄弱,建议作为近期重点提升方向。"};
+}
+function barColor(p){ if(p>=80)return"linear-gradient(90deg,#3fc9e0,#8fe6f2)"; if(p>=60)return"linear-gradient(90deg,#4a90d9,#6fbdf0)"; if(p>=40)return"linear-gradient(90deg,#e0a94a,#f2c877)"; return"linear-gradient(90deg,#d55f7d,#ec8fa6)"; }
+
+/* ================= 逻辑 ================= */
+let idx=0, locked=false; const answers=new Array(QS.length).fill(null);
+const $=id=>document.getElementById(id);
+
+function start(){ idx=0; locked=false; answers.fill(null); show('quiz'); render(); }
+function restart(){ idx=0; locked=false; answers.fill(null); show('intro'); window.scrollTo(0,0); }
+function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); $(id).classList.add('active'); }
+
+function render(){
+  const q=QS[idx], dim=DIMS.find(d=>d.id===q.d), cat=CATS[dim.cat];
+  $('qnow').textContent=idx+1;
+  $('qbar').style.width=((idx)/QS.length*100)+'%';
+  $('qcat').textContent=cat.name+" · "+dim.name;
+  $('qcat').style.color=cat.color;
+  $('qtext').textContent=q.t;
+  const box=$('opts'); box.innerHTML='';
+  SCALE.forEach(s=>{
+    const b=document.createElement('button');
+    b.className='opt'+(answers[idx]===s.v?' sel':'');
+    b.innerHTML='<span class="dot"></span><span>'+s.t+'</span>';
+    b.onclick=()=>choose(s.v);
+    box.appendChild(b);
+  });
+  $('prevBtn').style.visibility = idx===0?'hidden':'visible';
+}
+function choose(v){
+  if(locked) return;            // 防连点：切题动画期间忽略再次点击
+  answers[idx]=v;
+  render();
+  locked=true;
+  setTimeout(()=>{
+    locked=false;
+    if(idx<QS.length-1){ idx++; render(); }
+    else{
+      const miss=answers.indexOf(null);   // 结尾兜底：仍有未答则跳回补答
+      if(miss>=0){ idx=miss; render(); } else { finish(); }
+    }
+  }, 230);
+}
+function prev(){ if(locked) return; if(idx>0){ idx--; render(); } }
+
+function finish(){
+  $('qbar').style.width='100%';
+  // 计分
+  const dimSum={}, dimN={};
+  DIMS.forEach(d=>{dimSum[d.id]=0; dimN[d.id]=0;});
+  QS.forEach((q,i)=>{
+    let a=answers[i]; if(a==null) return;       // 兜底：跳过未答题，绝不用空值计算
+    let sc=q.r ? 6-a : a;                        // 反向翻转（仅对有效作答）
+    dimSum[q.d]+=sc; dimN[q.d]++;
+  });
+  const dimPct={};
+  DIMS.forEach(d=>{ const n=dimN[d.id], raw=dimSum[d.id], max=n*5, min=n;
+    let p = n>0 ? Math.round((raw-min)/(max-min)*100) : 0;
+    dimPct[d.id]=Math.max(0, Math.min(100, p));  // 双保险钳制在0~100
+  });
+  const catPct={};
+  Object.keys(CATS).forEach(c=>{ const ds=DIMS.filter(d=>d.cat===c);
+    catPct[c]=Math.round(ds.reduce((a,d)=>a+dimPct[d.id],0)/ds.length); });
+  const total=Math.round(DIMS.reduce((a,d)=>a+dimPct[d.id],0)/DIMS.length);
+
+  show('result'); window.scrollTo(0,0);
+  paint(total,catPct,dimPct);
+}
+
+function paint(total,catPct,dimPct){
+  window.__res={total,catPct,dimPct};   // 供结果长图使用
+  // 环形
+  $('totScore').textContent='0';
+  const ring=$('ringP'); const off=515-515*total/100;
+  setTimeout(()=>{ ring.style.transition='stroke-dashoffset 1.4s ease'; ring.style.strokeDashoffset=off; },100);
+  animateNum($('totScore'),total,1200);
+  const lv=levelOf(total);
+  $('totLevel').textContent="综合水平:"+lv.t;
+  $('totLevel').style.color=lv.c;
+  $('totDesc').textContent=descFor(total,catPct);
+
+  // 分类卡
+  const cbox=$('cats'); cbox.innerHTML='';
+  Object.keys(CATS).forEach(c=>{
+    const p=catPct[c], l=levelOf(p);
+    const el=document.createElement('div'); el.className='catc';
+    el.innerHTML='<div class="cn">'+CATS[c].name+'</div><div class="cs" style="color:'+l.c+'">'+p+'</div>'+
+      '<div class="cl" style="color:'+l.c+';background:rgba(255,255,255,.06)">'+l.t+'</div>';
+    cbox.appendChild(el);
+  });
+
+  // 维度详解
+  const g=$('dgrid'); g.innerHTML='';
+  DIMS.forEach(d=>{
+    const p=dimPct[d.id], l=levelOf(p);
+    const adv = p>=60 ? ADVICE[d.id].hi : ADVICE[d.id].lo;
+    const row=document.createElement('div'); row.className='drow';
+    row.innerHTML=
+      '<div class="dh"><div class="dn">'+d.name+'<small>'+CATS[d.cat].name+' · '+d.note+'</small></div>'+
+      '<div class="dv" style="color:'+l.c+'">'+p+'</div></div>'+
+      '<div class="track"><span data-w="'+p+'" style="background:'+barColor(p)+'"></span></div>'+
+      '<div class="adv"><span class="lab" style="color:'+l.c+';background:rgba(255,255,255,.06)">'+l.t+'</span>'+adv+'</div>';
+    g.appendChild(row);
+  });
+  setTimeout(()=>document.querySelectorAll('.track>span').forEach(s=>s.style.width=s.dataset.w+'%'),200);
+
+  drawRadar(dimPct);
+}
+function descFor(total,catPct){
+  const top=DIMS.reduce((a,b)=> a.p>=b.p?a:b, {p:-1});
+  // 找最强最弱分类
+  const arr=Object.keys(CATS).map(c=>({c,p:catPct[c]})).sort((a,b)=>b.p-a.p);
+  const strong=CATS[arr[0].c].name, weak=CATS[arr[2].c].name;
+  let base;
+  if(total>=80) base="你已是AI时代的高胜任力人才,三层能力协同良好。";
+  else if(total>=60) base="你已具备扎实的AI应用胜任力,整体表现稳健。";
+  else if(total>=40) base="你正走在成为AI人才的路上,基础已经形成。";
+  else base="你正处于AI能力建设的起步阶段,潜力空间很大。";
+  return base+"你的相对优势在「"+strong+"」,而「"+weak+"」是当前最值得投入的提升方向。";
+}
+function animateNum(el,to,dur){
+  const st=performance.now();
+  (function tick(t){ const p=Math.min((t-st)/dur,1); el.textContent=Math.round(p*to); if(p<1)requestAnimationFrame(tick); })(st);
+}
+
+/* 纯SVG雷达图，无外部依赖。radarInner可被结果图复用 */
+function radarInner(cx,cy,R,dimPct,anim,gid){
+  const N=DIMS.length, lblR=R+34;
+  const ang=i=>(-Math.PI/2)+(i*2*Math.PI/N); // 正上方起，顺时针
+  const pt=(i,r)=>[cx+r*Math.cos(ang(i)), cy+r*Math.sin(ang(i))];
+  let s='';
+  [20,40,60,80,100].forEach(v=>{
+    const r=R*v/100, pts=DIMS.map((_,i)=>pt(i,r).map(n=>n.toFixed(1)).join(',')).join(' ');
+    s+='<polygon points="'+pts+'" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="1"/>';
+  });
+  DIMS.forEach((d,i)=>{
+    const [ex,ey]=pt(i,R);
+    s+='<line x1="'+cx+'" y1="'+cy+'" x2="'+ex.toFixed(1)+'" y2="'+ey.toFixed(1)+'" stroke="rgba(255,255,255,.10)" stroke-width="1"/>';
+    const [lx,ly]=pt(i,lblR);
+    let anchor='middle'; const dx=lx-cx;
+    if(dx>6)anchor='start'; else if(dx<-6)anchor='end';
+    const p=dimPct[d.id];
+    const col = p>=80?'#8fe6f2':p>=60?'#9fc7f0':p>=40?'#f2c877':'#ec8fa6';
+    s+='<text x="'+lx.toFixed(1)+'" y="'+ly.toFixed(1)+'" fill="#cfe6ff" font-size="12.5" font-weight="600" text-anchor="'+anchor+'" dominant-baseline="middle">'+d.name+'</text>';
+    s+='<text x="'+lx.toFixed(1)+'" y="'+(ly+15).toFixed(1)+'" fill="'+col+'" font-size="12" font-weight="700" text-anchor="'+anchor+'" dominant-baseline="middle">'+p+'%</text>';
+  });
+  const dpts=DIMS.map((d,i)=>pt(i,R*dimPct[d.id]/100));
+  const poly=dpts.map(p=>p.map(n=>n.toFixed(1)).join(',')).join(' ');
+  s+='<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3fc9e0" stop-opacity=".45"/><stop offset="1" stop-color="#5aa9e6" stop-opacity=".28"/></linearGradient></defs>';
+  s+='<polygon '+(anim?'class="radar-poly" ':'')+'points="'+poly+'" fill="url(#'+gid+')" stroke="#3fc9e0" stroke-width="2.2" stroke-linejoin="round"/>';
+  dpts.forEach((p,i)=>{ s+='<circle '+(anim?'class="radar-dot" style="animation-delay:'+(0.6+i*0.06)+'s" ':'')+'cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="4" fill="#8fe6f2" stroke="#fff" stroke-width="1.5"/>'; });
+  return s;
+}
+function drawRadar(dimPct){
+  const s='<svg viewBox="0 0 460 410" xmlns="http://www.w3.org/2000/svg">'+radarInner(230,205,135,dimPct,true,'rg')+'</svg>';
+  document.getElementById('radarWrap').innerHTML=s;
+}
+
+/* ====== 结果长图（自绘SVG→PNG），手机长按可存相册 ====== */
+function hexFor(p){ return p>=80?'#3fc9e0':p>=60?'#5aa9e6':p>=40?'#e0a94a':'#d55f7d'; }
+function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function buildReportSVG(){
+  const R=window.__res; if(!R) return null;
+  const {total,catPct,dimPct}=R, W=760;
+  const lv=levelOf(total);
+  const NS='http://www.w3.org/2000/svg';
+  // 计算高度：头部+雷达+分类+9条+版权
+  const yRadarTop=300, radarH=400, yCats=yRadarTop+radarH+10;
+  const yDims=yCats+120, rowH=52, H=yDims+DIMS.length*rowH+90;
+  let s='<svg xmlns="'+NS+'" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" font-family="-apple-system,\'PingFang SC\',\'Microsoft YaHei\',sans-serif">';
+  s+='<defs><linearGradient id="bgg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0a1a3a"/><stop offset="0.55" stop-color="#0e2452"/><stop offset="1" stop-color="#153a6b"/></linearGradient></defs>';
+  s+='<rect width="'+W+'" height="'+H+'" fill="url(#bgg)"/>';
+  // 顶部标题
+  s+='<text x="'+W/2+'" y="52" text-anchor="middle" fill="#eaf4ff" font-size="26" font-weight="800">AI 人才胜任力自评 · 结果报告</text>';
+  s+='<text x="'+W/2+'" y="80" text-anchor="middle" fill="#8fb8e6" font-size="13">三层九维模型</text>';
+  // 综合得分环
+  const cx=W/2, cy=180, rr=62, C=2*Math.PI*rr, off=C*(1-total/100);
+  s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+rr+'" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="12"/>';
+  s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+rr+'" fill="none" stroke="#3fc9e0" stroke-width="12" stroke-linecap="round" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'" transform="rotate(-90 '+cx+' '+cy+')"/>';
+  s+='<text x="'+cx+'" y="'+(cy+8)+'" text-anchor="middle" fill="#8fe6f2" font-size="46" font-weight="800">'+total+'</text>';
+  s+='<text x="'+cx+'" y="'+(cy+34)+'" text-anchor="middle" fill="#7f9dc4" font-size="12">综合得分</text>';
+  s+='<text x="'+cx+'" y="'+(cy+80)+'" text-anchor="middle" fill="'+lv.c.replace('var(--good)','#3fc9e0').replace('var(--mid)','#5aa9e6').replace('var(--warn)','#e0a94a').replace('var(--low)','#d55f7d')+'" font-size="19" font-weight="800">综合水平：'+lv.t+'</text>';
+  // 雷达
+  s+='<text x="40" y="'+(yRadarTop-8)+'" fill="#eaf4ff" font-size="16" font-weight="700">九维能力雷达</text>';
+  s+=radarInner(W/2, yRadarTop+radarH/2-10, 150, dimPct, false, 'rgimg');
+  // 三大分类
+  const cats=Object.keys(CATS), bw=(W-80-2*20)/3;
+  s+='<text x="40" y="'+(yCats-18)+'" fill="#eaf4ff" font-size="16" font-weight="700">三大分类概览</text>';
+  cats.forEach((c,i)=>{
+    const x=40+i*(bw+20), p=catPct[c], l=levelOf(p), col=hexFor(p);
+    s+='<rect x="'+x+'" y="'+yCats+'" width="'+bw+'" height="86" rx="14" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.12)"/>';
+    s+='<text x="'+(x+bw/2)+'" y="'+(yCats+26)+'" text-anchor="middle" fill="#a9c4e6" font-size="14" font-weight="700">'+CATS[c].name+'</text>';
+    s+='<text x="'+(x+bw/2)+'" y="'+(yCats+62)+'" text-anchor="middle" fill="'+col+'" font-size="30" font-weight="800">'+p+'</text>';
+    s+='<text x="'+(x+bw/2)+'" y="'+(yCats+80)+'" text-anchor="middle" fill="'+col+'" font-size="11" font-weight="700">'+l.t+'</text>';
+  });
+  // 九维度条
+  s+='<text x="40" y="'+(yDims-16)+'" fill="#eaf4ff" font-size="16" font-weight="700">九维度得分</text>';
+  DIMS.forEach((d,i)=>{
+    const y=yDims+i*rowH, p=dimPct[d.id], col=hexFor(p), barW=W-80-70, filled=barW*p/100;
+    s+='<text x="40" y="'+(y+16)+'" fill="#eaf4ff" font-size="14" font-weight="600">'+esc(d.name)+'</text>';
+    s+='<text x="'+(W-40)+'" y="'+(y+16)+'" text-anchor="end" fill="'+col+'" font-size="16" font-weight="800">'+p+'</text>';
+    s+='<rect x="40" y="'+(y+26)+'" width="'+barW+'" height="9" rx="4.5" fill="rgba(255,255,255,.08)"/>';
+    s+='<rect x="40" y="'+(y+26)+'" width="'+filled.toFixed(1)+'" height="9" rx="4.5" fill="'+col+'"/>';
+  });
+  // 版权
+  const fy=H-46;
+  s+='<line x1="40" y1="'+(fy-14)+'" x2="'+(W-40)+'" y2="'+(fy-14)+'" stroke="rgba(255,255,255,.1)"/>';
+  s+='<text x="'+W/2+'" y="'+fy+'" text-anchor="middle" fill="#8fb8e6" font-size="12">版权所有 © 深蓝君管理咨询（上海）有限公司</text>';
+  s+='<text x="'+W/2+'" y="'+(fy+20)+'" text-anchor="middle" fill="#7f9dc4" font-size="12">作者：徐刚（深蓝君） · 联系微信号：deepblueinfo1</text>';
+  s+='</svg>';
+  return {svg:s, W, H};
+}
+function saveImage(){
+  const rep=buildReportSVG(); if(!rep){ alert('请先完成测评'); return; }
+  const scale=2;
+  const img=new Image();
+  const blob=new Blob([rep.svg],{type:'image/svg+xml;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  img.onload=function(){
+    const cv=document.createElement('canvas'); cv.width=rep.W*scale; cv.height=rep.H*scale;
+    const ctx=cv.getContext('2d'); ctx.scale(scale,scale); ctx.drawImage(img,0,0);
+    URL.revokeObjectURL(url);
+    let data;
+    try{ data=cv.toDataURL('image/png'); }catch(e){ alert('生成图片失败，请改用截图保存'); return; }
+    document.getElementById('imgOut').src=data;
+    document.getElementById('imgDl').href=data;
+    document.getElementById('imgModal').classList.add('show');
+  };
+  img.onerror=function(){ URL.revokeObjectURL(url); alert('生成图片失败，请改用手机截图保存'); };
+  img.src=url;
+}
+function closeModal(){ document.getElementById('imgModal').classList.remove('show'); }
+function printRes(){ window.print(); }
+
+/* 设备识别：手机隐藏打印按钮（打印在移动端浏览器不可靠） */
+const IS_MOBILE = matchMedia('(pointer:coarse)').matches || /iPhone|iPad|iPod|Android|HarmonyOS|Mobile/i.test(navigator.userAgent);
+window.addEventListener('DOMContentLoaded',()=>{
+  if(IS_MOBILE){ const pb=document.getElementById('printBtn'); if(pb) pb.style.display='none';
+    const dl=document.getElementById('imgDl'); if(dl) dl.textContent='下载图片(部分手机)';
+  }
+});
+
+/* ================= 背景粒子 ================= */
+(function(){
+  const cv=document.getElementById('bgcanvas'), c=cv.getContext('2d');
+  let W,H,pts;
+  function rz(){ W=cv.width=innerWidth; H=cv.height=innerHeight;
+    pts=Array.from({length:Math.min(70,Math.floor(W*H/22000))},()=>({
+      x:Math.random()*W, y:Math.random()*H, vx:(Math.random()-.5)*.35, vy:(Math.random()-.5)*.35, r:Math.random()*1.8+.6 })); }
+  rz(); addEventListener('resize',rz);
+  (function loop(){ c.clearRect(0,0,W,H);
+    for(let i=0;i<pts.length;i++){ const p=pts[i];
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0||p.x>W)p.vx*=-1; if(p.y<0||p.y>H)p.vy*=-1;
+      c.beginPath(); c.arc(p.x,p.y,p.r,0,7); c.fillStyle='rgba(120,200,235,.55)'; c.fill();
+      for(let j=i+1;j<pts.length;j++){ const q=pts[j], dx=p.x-q.x, dy=p.y-q.y, dd=dx*dx+dy*dy;
+        if(dd<11000){ c.beginPath(); c.moveTo(p.x,p.y); c.lineTo(q.x,q.y);
+          c.strokeStyle='rgba(90,169,230,'+(0.14*(1-dd/11000))+')'; c.lineWidth=1; c.stroke(); } } }
+    requestAnimationFrame(loop); })();
+})();
+</script>
+</body>
+</html>
