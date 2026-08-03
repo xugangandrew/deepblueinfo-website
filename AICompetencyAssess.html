@@ -33,7 +33,7 @@
               linear-gradient(160deg,#0a1a3a 0%, #0e2452 55%, #153a6b 100%);
   }
   #bgcanvas{position:fixed; inset:0; z-index:0; pointer-events:none;}
-  .wrap{position:relative; z-index:1; max-width:860px; margin:0 auto; padding:28px 18px 60px;}
+  .wrap{position:relative; z-index:1; max-width:860px; margin:0 auto; padding:48px 18px 60px;}
   .glow{position:fixed; border-radius:50%; filter:blur(70px); opacity:.5; z-index:0; pointer-events:none; animation:float 14s ease-in-out infinite;}
   .g1{width:340px;height:340px;background:#2f8fd0;top:-80px;left:-60px;}
   .g2{width:300px;height:300px;background:#3fc9e0;bottom:-60px;right:-40px;animation-delay:-5s;}
@@ -146,7 +146,7 @@
   .copyright b{color:var(--sub);}
   @media(max-width:600px){
     .model,.cats{grid-template-columns:1fr;}
-    .wrap{padding:20px 14px 50px;}
+    .wrap{padding:44px 14px 50px;}
     .qcard{padding:22px 16px;}
     .btn{padding:14px 30px; font-size:15px;}
   }
@@ -515,56 +515,81 @@ function drawRadar(dimPct){
 /* ====== 结果长图（自绘SVG→PNG），手机长按可存相册 ====== */
 function hexFor(p){ return p>=80?'#3fc9e0':p>=60?'#5aa9e6':p>=40?'#e0a94a':'#d55f7d'; }
 function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+// 中文按字符数折行（含标点，简单可靠）
+function wrapCN(text,max){ const out=[]; let ln=''; for(const ch of String(text)){ ln+=ch; if(ln.length>=max){ out.push(ln); ln=''; } } if(ln) out.push(ln); return out; }
 function buildReportSVG(){
   const R=window.__res; if(!R) return null;
-  const {total,catPct,dimPct}=R, W=760;
+  const {total,catPct,dimPct}=R, W=760, pad=40;
   const lv=levelOf(total);
   const NS='http://www.w3.org/2000/svg';
-  // 计算高度：头部+雷达+分类+9条+版权
-  const yRadarTop=300, radarH=400, yCats=yRadarTop+radarH+10;
-  const yDims=yCats+120, rowH=52, H=yDims+DIMS.length*rowH+90;
-  let s='<svg xmlns="'+NS+'" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" font-family="-apple-system,\'PingFang SC\',\'Microsoft YaHei\',sans-serif">';
-  s+='<defs><linearGradient id="bgg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0a1a3a"/><stop offset="0.55" stop-color="#0e2452"/><stop offset="1" stop-color="#153a6b"/></linearGradient></defs>';
-  s+='<rect width="'+W+'" height="'+H+'" fill="url(#bgg)"/>';
+  let s=''; // 先构建内容，最后再算总高度
   // 顶部标题
   s+='<text x="'+W/2+'" y="52" text-anchor="middle" fill="#eaf4ff" font-size="26" font-weight="800">AI 人才胜任力自评 · 结果报告</text>';
-  s+='<text x="'+W/2+'" y="80" text-anchor="middle" fill="#8fb8e6" font-size="13">三层九维模型</text>';
+  const d0=new Date(), iso=d0.getFullYear()+'-'+String(d0.getMonth()+1).padStart(2,'0')+'-'+String(d0.getDate()).padStart(2,'0');
+  s+='<text x="'+W/2+'" y="80" text-anchor="middle" fill="#8fb8e6" font-size="13">三层九维模型 · 测评日期 '+iso+'</text>';
   // 综合得分环
   const cx=W/2, cy=180, rr=62, C=2*Math.PI*rr, off=C*(1-total/100);
   s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+rr+'" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="12"/>';
   s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+rr+'" fill="none" stroke="#3fc9e0" stroke-width="12" stroke-linecap="round" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'" transform="rotate(-90 '+cx+' '+cy+')"/>';
   s+='<text x="'+cx+'" y="'+(cy+8)+'" text-anchor="middle" fill="#8fe6f2" font-size="46" font-weight="800">'+total+'</text>';
   s+='<text x="'+cx+'" y="'+(cy+34)+'" text-anchor="middle" fill="#7f9dc4" font-size="12">综合得分</text>';
-  s+='<text x="'+cx+'" y="'+(cy+80)+'" text-anchor="middle" fill="'+lv.c.replace('var(--good)','#3fc9e0').replace('var(--mid)','#5aa9e6').replace('var(--warn)','#e0a94a').replace('var(--low)','#d55f7d')+'" font-size="19" font-weight="800">综合水平：'+lv.t+'</text>';
+  // 等级药丸（彩色描边+底色，视觉更醒目）—— 下移，避免与分数环重叠
+  const lvTxt='综合水平 · '+lv.t, pillW=lvTxt.length*17+44, lvcol=hexFor(total);
+  s+='<rect x="'+(cx-pillW/2)+'" y="'+(cy+82)+'" width="'+pillW+'" height="32" rx="16" fill="'+lvcol+'" fill-opacity="0.14" stroke="'+lvcol+'" stroke-opacity="0.6"/>';
+  s+='<text x="'+cx+'" y="'+(cy+103)+'" text-anchor="middle" fill="'+lvcol+'" font-size="17" font-weight="800">'+lvTxt+'</text>';
+  // 综合评语（折行）
+  let y=cy+146;
+  wrapCN(descFor(total,catPct),42).forEach(line=>{ s+='<text x="'+W/2+'" y="'+y+'" text-anchor="middle" fill="#a9c4e6" font-size="13.5">'+esc(line)+'</text>'; y+=21; });
   // 雷达
-  s+='<text x="40" y="'+(yRadarTop-8)+'" fill="#eaf4ff" font-size="16" font-weight="700">九维能力雷达</text>';
-  s+=radarInner(W/2, yRadarTop+radarH/2-10, 150, dimPct, false, 'rgimg');
+  y+=18;
+  s+='<text x="'+pad+'" y="'+y+'" fill="#eaf4ff" font-size="16" font-weight="700">九维能力雷达</text>';
+  const radarTop=y+8, R150=150;
+  s+=radarInner(W/2, radarTop+R150+45, R150, dimPct, false, 'rgimg');
+  y=radarTop+2*R150+90;
   // 三大分类
-  const cats=Object.keys(CATS), bw=(W-80-2*20)/3;
-  s+='<text x="40" y="'+(yCats-18)+'" fill="#eaf4ff" font-size="16" font-weight="700">三大分类概览</text>';
+  y+=6;
+  s+='<text x="'+pad+'" y="'+y+'" fill="#eaf4ff" font-size="16" font-weight="700">三大分类概览</text>';
+  const cats=Object.keys(CATS), bw=(W-2*pad-2*20)/3, catY=y+14;
   cats.forEach((c,i)=>{
-    const x=40+i*(bw+20), p=catPct[c], l=levelOf(p), col=hexFor(p);
-    s+='<rect x="'+x+'" y="'+yCats+'" width="'+bw+'" height="86" rx="14" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.12)"/>';
-    s+='<text x="'+(x+bw/2)+'" y="'+(yCats+26)+'" text-anchor="middle" fill="#a9c4e6" font-size="14" font-weight="700">'+CATS[c].name+'</text>';
-    s+='<text x="'+(x+bw/2)+'" y="'+(yCats+62)+'" text-anchor="middle" fill="'+col+'" font-size="30" font-weight="800">'+p+'</text>';
-    s+='<text x="'+(x+bw/2)+'" y="'+(yCats+80)+'" text-anchor="middle" fill="'+col+'" font-size="11" font-weight="700">'+l.t+'</text>';
+    const x=pad+i*(bw+20), p=catPct[c], l=levelOf(p), col=hexFor(p);
+    s+='<rect x="'+x+'" y="'+catY+'" width="'+bw+'" height="86" rx="14" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.12)"/>';
+    s+='<text x="'+(x+bw/2)+'" y="'+(catY+26)+'" text-anchor="middle" fill="#a9c4e6" font-size="14" font-weight="700">'+CATS[c].name+'</text>';
+    s+='<text x="'+(x+bw/2)+'" y="'+(catY+62)+'" text-anchor="middle" fill="'+col+'" font-size="30" font-weight="800">'+p+'</text>';
+    s+='<text x="'+(x+bw/2)+'" y="'+(catY+80)+'" text-anchor="middle" fill="'+col+'" font-size="11" font-weight="700">'+l.t+'</text>';
   });
-  // 九维度条
-  s+='<text x="40" y="'+(yDims-16)+'" fill="#eaf4ff" font-size="16" font-weight="700">九维度得分</text>';
-  DIMS.forEach((d,i)=>{
-    const y=yDims+i*rowH, p=dimPct[d.id], col=hexFor(p), barW=W-80-70, filled=barW*p/100;
-    s+='<text x="40" y="'+(y+16)+'" fill="#eaf4ff" font-size="14" font-weight="600">'+esc(d.name)+'</text>';
-    s+='<text x="'+(W-40)+'" y="'+(y+16)+'" text-anchor="end" fill="'+col+'" font-size="16" font-weight="800">'+p+'</text>';
-    s+='<rect x="40" y="'+(y+26)+'" width="'+barW+'" height="9" rx="4.5" fill="rgba(255,255,255,.08)"/>';
-    s+='<rect x="40" y="'+(y+26)+'" width="'+filled.toFixed(1)+'" height="9" rx="4.5" fill="'+col+'"/>';
+  y=catY+86;
+  // 九维度详解与建议
+  y+=40;
+  s+='<text x="'+pad+'" y="'+y+'" fill="#eaf4ff" font-size="16" font-weight="700">九维度详解与建议</text>';
+  y+=16;
+  const barW=W-2*pad-70;
+  DIMS.forEach(d=>{
+    const p=dimPct[d.id], col=hexFor(p), l=levelOf(p);
+    const adv=(p>=60?ADVICE[d.id].hi:ADVICE[d.id].lo);
+    s+='<text x="'+pad+'" y="'+(y+16)+'" fill="#eaf4ff" font-size="14.5" font-weight="700">'+esc(d.name)+' <tspan fill="#7f9dc4" font-size="11" font-weight="400">'+esc(CATS[d.cat].name+' · '+d.note)+'</tspan></text>';
+    s+='<text x="'+(W-pad)+'" y="'+(y+16)+'" text-anchor="end" fill="'+col+'" font-size="17" font-weight="800">'+p+'</text>';
+    s+='<rect x="'+pad+'" y="'+(y+26)+'" width="'+barW+'" height="9" rx="4.5" fill="rgba(255,255,255,.16)"/>';
+    s+='<rect x="'+pad+'" y="'+(y+26)+'" width="'+(barW*p/100).toFixed(1)+'" height="9" rx="4.5" fill="'+col+'"/>';
+    // 等级标签 + 建议（折行）
+    let ay=y+52;
+    s+='<rect x="'+pad+'" y="'+(ay-13)+'" width="52" height="18" rx="9" fill="rgba(255,255,255,.07)"/>';
+    s+='<text x="'+(pad+26)+'" y="'+(ay)+'" text-anchor="middle" fill="'+col+'" font-size="11" font-weight="700">'+l.t+'</text>';
+    const advLines=wrapCN(adv,40);
+    advLines.forEach((line,li)=>{ s+='<text x="'+(pad+62)+'" y="'+(ay+li*20)+'" fill="#c3d8f2" font-size="13">'+esc(line)+'</text>'; });
+    y = ay + advLines.length*20 + 14;
   });
   // 版权
-  const fy=H-46;
-  s+='<line x1="40" y1="'+(fy-14)+'" x2="'+(W-40)+'" y2="'+(fy-14)+'" stroke="rgba(255,255,255,.1)"/>';
-  s+='<text x="'+W/2+'" y="'+fy+'" text-anchor="middle" fill="#8fb8e6" font-size="12">版权所有 © 深蓝君管理咨询（上海）有限公司</text>';
-  s+='<text x="'+W/2+'" y="'+(fy+20)+'" text-anchor="middle" fill="#7f9dc4" font-size="12">作者：徐刚（深蓝君） · 联系微信号：deepblueinfo1</text>';
-  s+='</svg>';
-  return {svg:s, W, H};
+  y+=18;
+  s+='<line x1="'+pad+'" y1="'+(y-14)+'" x2="'+(W-pad)+'" y2="'+(y-14)+'" stroke="rgba(255,255,255,.1)"/>';
+  s+='<text x="'+W/2+'" y="'+(y+6)+'" text-anchor="middle" fill="#8fb8e6" font-size="12">版权所有 © 深蓝君管理咨询（上海）有限公司</text>';
+  s+='<text x="'+W/2+'" y="'+(y+26)+'" text-anchor="middle" fill="#7f9dc4" font-size="12">作者：徐刚（深蓝君） · 联系微信号：deepblueinfo1</text>';
+  s+='<text x="'+W/2+'" y="'+(y+46)+'" text-anchor="middle" fill="#7f9dc4" font-size="12">主页：www.deepblueinfo.com</text>';
+  const H=y+72;
+  // 组装：背景 + 内容
+  let head='<svg xmlns="'+NS+'" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" font-family="-apple-system,\'PingFang SC\',\'Microsoft YaHei\',sans-serif">';
+  head+='<defs><linearGradient id="bgg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0a1a3a"/><stop offset="0.55" stop-color="#0e2452"/><stop offset="1" stop-color="#153a6b"/></linearGradient></defs>';
+  head+='<rect width="'+W+'" height="'+H+'" fill="url(#bgg)"/>';
+  return {svg:head+s+'</svg>', W, H};
 }
 function saveImage(){
   const rep=buildReportSVG(); if(!rep){ alert('请先完成测评'); return; }
@@ -578,8 +603,9 @@ function saveImage(){
     URL.revokeObjectURL(url);
     let data;
     try{ data=cv.toDataURL('image/png'); }catch(e){ alert('生成图片失败，请改用截图保存'); return; }
+    const d=new Date(), iso=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
     document.getElementById('imgOut').src=data;
-    document.getElementById('imgDl').href=data;
+    const dl=document.getElementById('imgDl'); dl.href=data; dl.download='AI人才胜任力自评结果_'+iso+'.png';
     document.getElementById('imgModal').classList.add('show');
   };
   img.onerror=function(){ URL.revokeObjectURL(url); alert('生成图片失败，请改用手机截图保存'); };
