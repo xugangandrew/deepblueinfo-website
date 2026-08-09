@@ -45,6 +45,19 @@
     transition:.25s;}
   .home-link:hover{color:var(--txt); border-color:rgba(63,201,224,.5);}
 
+  .lang-switch{position:fixed; top:16px; right:18px; z-index:20;}
+  .lang-switch select{
+    font-size:13px; color:var(--sub); background:rgba(255,255,255,0.05); backdrop-filter:blur(6px);
+    border:1px solid rgba(255,255,255,0.12); border-radius:20px; padding:6px 14px; cursor:pointer;
+    outline:none; transition:.25s; font-family:inherit;}
+  .lang-switch select:hover{color:var(--txt); border-color:rgba(63,201,224,.5);}
+  .lang-switch select:focus{border-color:rgba(63,201,224,.6);}
+  .lang-switch select option{background:#0e2452; color:#eaf4ff;}
+  @media(max-width:420px){
+    .home-link{font-size:12px; padding:5px 10px; gap:4px;}
+    .lang-switch select{font-size:12px; padding:5px 10px;}
+  }
+
   /* screens */
   .screen{display:none; animation:fade .5s ease both;}
   .screen.active{display:block;}
@@ -161,7 +174,7 @@
     /* 渐变裁剪文字在打印时会透明,改为实色以保证可见 */
     .ring .num b, h1 .hl{ -webkit-text-fill-color:#3fc9e0 !important; color:#3fc9e0 !important; background:none !important; }
     /* 隐藏交互按钮,输出更干净 */
-    .btn,.qnav,.rfoot{ display:none !important; }
+    .btn,.qnav,.rfoot,.lang-switch,.home-link{ display:none !important; }
     /* 避免卡片被跨页截断 */
     .drow,.catc,.chartbox,.mcard,.rhero{ break-inside:avoid; page-break-inside:avoid; }
   }
@@ -170,24 +183,30 @@
 <body>
 <canvas id="bgcanvas"></canvas>
 <div class="glow g1"></div><div class="glow g2"></div>
-<a href="index.html" class="home-link">&larr; 返回首页</a>
+<a href="index.html" class="home-link" id="homeLink">&larr; 返回首页</a>
+<div class="lang-switch" id="langSwitch">
+  <select id="langSel" onchange="setLang(this.value)">
+    <option value="zh">中文</option>
+    <option value="en">English</option>
+  </select>
+</div>
 
 <div class="wrap">
 
   <!-- ===== INTRO ===== -->
   <section id="intro" class="screen active">
-    <span class="badge">AI 人才胜任力模型 · 自评测试</span>
-    <h1>你,准备好成为<br><span class="hl">AI 时代的人才</span>了吗?</h1>
-    <p class="lead">本测评基于「三层九维」AI人才胜任力模型,通过 27 道贴近真实工作的情景题,帮你在 3~5 分钟内看清自己在<b style="color:#cfe6ff">顶层策略、中层执行、底层心智</b>三大维度上的能力分布,并获得针对性的成长建议。</p>
+    <span class="badge" id="badgeText">AI 人才胜任力模型 · 自评测试</span>
+    <h1 id="h1Text">你,准备好成为<br><span class="hl">AI 时代的人才</span>了吗?</h1>
+    <p class="lead" id="leadText">本测评基于「三层九维」AI人才胜任力模型,通过 27 道贴近真实工作的情景题,帮你在 3~5 分钟内看清自己在<b style="color:#cfe6ff">顶层策略、中层执行、底层心智</b>三大维度上的能力分布,并获得针对性的成长建议。</p>
 
-    <div class="model">
+    <div class="model" id="modelGrid">
       <div class="mcard"><div class="tag">顶层策略</div><div class="dim">业务洞察能力<br>问题转化能力<br>流程重构能力</div></div>
       <div class="mcard"><div class="tag">中层执行</div><div class="dim">数据分析能力<br>人机协同能力<br>结果验证能力</div></div>
       <div class="mcard"><div class="tag">底层心智</div><div class="dim">持续学习能力<br>判断与责任能力<br>合规安全能力</div></div>
     </div>
 
-    <div class="meta"><span>📝 <b>27</b> 道情景题</span><span>⏱ 约 <b>3~5</b> 分钟</span><span>📊 <b>9</b> 维度雷达分析</span><span>💡 个性化建议</span></div>
-    <button class="btn" onclick="start()">开始测评 →</button>
+    <div class="meta" id="metaLine"><span>📝 <b>27</b> 道情景题</span><span>⏱ 约 <b>3~5</b> 分钟</span><span>📊 <b>9</b> 维度雷达分析</span><span>💡 个性化建议</span></div>
+    <button class="btn" id="startBtn" onclick="start()">开始测评 →</button>
   </section>
 
   <!-- ===== QUIZ ===== -->
@@ -203,7 +222,7 @@
     </div>
     <div class="qnav">
       <button class="btn ghost" id="prevBtn" onclick="prev()">← 上一题</button>
-      <button class="btn ghost" onclick="restart()">重新开始</button>
+      <button class="btn ghost" id="quizRestartBtn" onclick="restart()">重新开始</button>
     </div>
   </section>
 
@@ -216,29 +235,29 @@
           <circle id="ringP" cx="95" cy="95" r="82" fill="none" stroke="url(#gg)" stroke-width="12" stroke-linecap="round" stroke-dasharray="515" stroke-dashoffset="515"/>
           <defs><linearGradient id="gg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3fc9e0"/><stop offset="1" stop-color="#5aa9e6"/></linearGradient></defs>
         </svg>
-        <div class="num"><b id="totScore">0</b><span>综合得分</span></div>
+        <div class="num"><b id="totScore">0</b><span id="totLabel">综合得分</span></div>
       </div>
       <div class="rlevel" id="totLevel"></div>
       <p class="rdesc" id="totDesc"></p>
     </div>
 
     <div class="chartbox">
-      <h3>九维能力雷达</h3>
-      <div class="cap">数值为各维度达成率(0~100%),越靠外圈能力越强</div>
+      <h3 id="radarTitle">九维能力雷达</h3>
+      <div class="cap" id="radarCap">数值为各维度达成率(0~100%),越靠外圈能力越强</div>
       <div id="radarWrap" class="radarwrap"></div>
     </div>
 
-    <h3 style="margin-bottom:12px; letter-spacing:1px;">三大分类概览</h3>
+    <h3 id="catsTitle" style="margin-bottom:12px; letter-spacing:1px;">三大分类概览</h3>
     <div class="cats" id="cats"></div>
 
     <div class="block">
-      <h3 style="margin-bottom:6px;">九维度详解与建议</h3>
-      <div class="cap" style="color:var(--muted); font-size:12.5px; margin-bottom:14px;">按当前得分给出针对性成长方向</div>
+      <h3 id="dgridTitle" style="margin-bottom:6px;">九维度详解与建议</h3>
+      <div class="cap" id="dgridCap" style="color:var(--muted); font-size:12.5px; margin-bottom:14px;">按当前得分给出针对性成长方向</div>
       <div class="dgrid" id="dgrid"></div>
     </div>
 
     <div class="rfoot">
-      <button class="btn" onclick="restart()">再测一次</button>
+      <button class="btn" id="resultRestartBtn" onclick="restart()">再测一次</button>
       <button class="btn" id="imgBtn" onclick="saveImage()">保存结果图片</button>
       <button class="btn ghost" id="printBtn" onclick="printRes()">打印 / 另存为PDF</button>
     </div>
@@ -247,116 +266,266 @@
   <!-- 结果图片弹层：手机长按保存 -->
   <div id="imgModal" class="modal">
     <div class="modalbox">
-      <div class="mhint">长按下方图片即可保存到相册(iPhone / 安卓通用),或点击「下载图片」</div>
+      <div class="mhint" id="mhintText">长按下方图片即可保存到相册(iPhone / 安卓通用),或点击「下载图片」</div>
       <div class="mimg"><img id="imgOut" alt="AI人才胜任力自评结果"></div>
       <div class="mbtns">
         <a id="imgDl" class="btn" download="AI人才胜任力自评结果.png">下载图片</a>
-        <button class="btn ghost" onclick="closeModal()">关闭</button>
+        <button class="btn ghost" id="modalCloseBtn" onclick="closeModal()">关闭</button>
       </div>
     </div>
   </div>
 
-  <div class="copyright">
+  <div class="copyright" id="copyrightText">
     版权所有 © <b>深蓝君管理咨询(上海)有限公司</b><br>
     作者:徐刚(深蓝君) · 联系微信号:<b>deepblueinfo1</b>
   </div>
 </div>
 
 <script>
+/* ================= 语言与文案 ================= */
+let LANG='zh';
+const IS_MOBILE = matchMedia('(pointer:coarse)').matches || /iPhone|iPad|iPod|Android|HarmonyOS|Mobile/i.test(navigator.userAgent);
+
+const I18N = {
+  zh:{
+    title:"AI人才胜任力自评 · 深蓝君",
+    home:"← 返回首页",
+    badge:"AI 人才胜任力模型 · 自评测试",
+    h1:'你,准备好成为<br><span class="hl">AI 时代的人才</span>了吗?',
+    lead:'本测评基于「三层九维」AI人才胜任力模型,通过 27 道贴近真实工作的情景题,帮你在 3~5 分钟内看清自己在<b style="color:#cfe6ff">顶层策略、中层执行、底层心智</b>三大维度上的能力分布,并获得针对性的成长建议。',
+    metaItems:["📝 <b>27</b> 道情景题","⏱ 约 <b>3~5</b> 分钟","📊 <b>9</b> 维度雷达分析","💡 个性化建议"],
+    startBtn:"开始测评 →",
+    prevBtn:"← 上一题",
+    quizRestart:"重新开始",
+    radarTitle:"九维能力雷达",
+    radarCap:"数值为各维度达成率(0~100%),越靠外圈能力越强",
+    catsTitle:"三大分类概览",
+    dgridTitle:"九维度详解与建议",
+    dgridCap:"按当前得分给出针对性成长方向",
+    resultRestart:"再测一次",
+    imgBtn:"保存结果图片",
+    printBtn:"打印 / 另存为PDF",
+    mhint:"长按下方图片即可保存到相册(iPhone / 安卓通用),或点击「下载图片」",
+    imgDl:"下载图片",
+    imgDlMobile:"下载图片(部分手机)",
+    modalClose:"关闭",
+    imgAlt:"AI人才胜任力自评结果",
+    dlFileBase:"AI人才胜任力自评结果",
+    copyright:'版权所有 © <b>深蓝君管理咨询(上海)有限公司</b><br>作者:徐刚(深蓝君) · 联系微信号:<b>deepblueinfo1</b>',
+    pleaseComplete:"请先完成测评",
+    genImgFail:"生成图片失败，请改用截图保存",
+    genImgFail2:"生成图片失败，请改用手机截图保存",
+    totalLabel:"综合得分",
+    totLevelPrefix:"综合水平:",
+    qsep:" · ",
+    levels:{lead:"领先型",prof:"胜任型",dev:"发展型",start:"起步型"},
+    levelDesc:{lead:"该项能力突出,已具备示范与带动他人的水平。",prof:"该项能力稳固,能独立胜任大多数场景。",dev:"该项能力初步具备,尚有明显提升空间。",start:"该项能力较薄弱,建议作为近期重点提升方向。"},
+    descBase:{a:"你已是AI时代的高胜任力人才,三层能力协同良好。",b:"你已具备扎实的AI应用胜任力,整体表现稳健。",c:"你正走在成为AI人才的路上,基础已经形成。",d:"你正处于AI能力建设的起步阶段,潜力空间很大。"},
+    descTail:function(strong,weak){ return "你的相对优势在「"+strong+"」,而「"+weak+"」是当前最值得投入的提升方向。"; },
+    report:{
+      title:"AI 人才胜任力自评 · 结果报告",
+      dateLine:"三层九维模型 · 测评日期 ",
+      score:"综合得分",
+      levelPrefix:"综合水平 · ",
+      radar:"九维能力雷达",
+      cats:"三大分类概览",
+      dgrid:"九维度详解与建议",
+      qr:"扫码测试AI胜任力",
+      copyright1:"版权所有 © 深蓝君管理咨询（上海）有限公司",
+      copyright2:"作者：徐刚（深蓝君） · 联系微信号：deepblueinfo1",
+      copyright3:"主页：www.deepblueinfo.com"
+    }
+  },
+  en:{
+    title:"AI Talent Competency Self-Assessment · DeepBlueInfo",
+    home:"← Back to Home",
+    badge:"AI Talent Competency Model · Self-Assessment",
+    h1:'Are you ready to become<br><span class="hl">an AI-era talent</span>?',
+    lead:'Based on the "Three Layers, Nine Dimensions" AI Talent Competency Model, this assessment uses 27 realistic workplace scenarios to help you see — in just 3–5 minutes — your ability profile across <b style="color:#cfe6ff">Top-level Strategy, Mid-level Execution, and Foundational Mindset</b>, along with tailored growth recommendations.',
+    metaItems:["📝 <b>27</b> scenario questions","⏱ About <b>3–5</b> minutes","📊 <b>9</b>-dimension radar analysis","💡 Personalized recommendations"],
+    startBtn:"Start Assessment →",
+    prevBtn:"← Previous",
+    quizRestart:"Restart",
+    radarTitle:"Nine-Dimension Radar",
+    radarCap:"Values represent the achievement rate per dimension (0–100%) — the further out, the stronger.",
+    catsTitle:"Three-Category Overview",
+    dgridTitle:"Nine-Dimension Breakdown & Recommendations",
+    dgridCap:"Tailored growth directions based on your current scores",
+    resultRestart:"Retake",
+    imgBtn:"Save Result Image",
+    printBtn:"Print / Save as PDF",
+    mhint:"Press and hold the image below to save it to your photos (iPhone / Android), or tap “Download Image”.",
+    imgDl:"Download Image",
+    imgDlMobile:"Download Image (some phones)",
+    modalClose:"Close",
+    imgAlt:"AI Talent Competency Self-Assessment Result",
+    dlFileBase:"AI_Competency_Assessment_Result",
+    copyright:'Copyright © <b>Shenlanjun Management Consulting (Shanghai) Co., Ltd.</b><br>Author: Andrew Xu (Shenlanjun) · WeChat: <b>deepblueinfo1</b>',
+    pleaseComplete:"Please complete the assessment first",
+    genImgFail:"Failed to generate the image — please take a screenshot instead.",
+    genImgFail2:"Failed to generate the image — please take a screenshot on your phone instead.",
+    totalLabel:"Overall Score",
+    totLevelPrefix:"Overall Level: ",
+    qsep:" · ",
+    levels:{lead:"Leading",prof:"Proficient",dev:"Developing",start:"Starter"},
+    levelDesc:{lead:"This ability stands out — you're at a level where you can model and lead others.",prof:"This ability is solid — you can independently handle most scenarios.",dev:"This ability is emerging — there's clear room to grow.",start:"This ability is relatively weak — consider it a priority area for improvement."},
+    descBase:{a:"You're already a highly competent AI-era talent, with strong synergy across all three layers of ability.",b:"You already have solid AI-application competency, with steady overall performance.",c:"You're on your way to becoming an AI talent, with a solid foundation already in place.",d:"You're at the starting stage of building AI capability, with plenty of room to grow."},
+    descTail:function(strong,weak){ return "Your relative strength lies in “"+strong+"”, while “"+weak+"” is the area most worth investing in right now."; },
+    report:{
+      title:"AI Talent Competency Self-Assessment · Result Report",
+      dateLine:"Three Layers, Nine Dimensions Model · Assessment Date ",
+      score:"Overall Score",
+      levelPrefix:"Overall Level · ",
+      radar:"Nine-Dimension Radar",
+      cats:"Three-Category Overview",
+      dgrid:"Nine-Dimension Breakdown & Recommendations",
+      qr:"Scan to take the assessment",
+      copyright1:"Copyright © Shenlanjun Management Consulting (Shanghai) Co., Ltd.",
+      copyright2:"Author: Andrew Xu (Shenlanjun) · WeChat: deepblueinfo1",
+      copyright3:"Website: www.deepblueinfo.com"
+    }
+  }
+};
+
 /* ================= 题库数据 ================= */
 // r:true 表示反向计分题(总是=1分, 从不=5分)
 const CATS = {
-  strat:{name:"顶层策略", color:"#3fc9e0"},
-  exec:{name:"中层执行", color:"#5aa9e6"},
-  mind:{name:"底层心智", color:"#7b8fd4"}
+  strat:{name:{zh:"顶层策略",en:"Top-level Strategy"}, color:"#3fc9e0"},
+  exec:{name:{zh:"中层执行",en:"Mid-level Execution"}, color:"#5aa9e6"},
+  mind:{name:{zh:"底层心智",en:"Foundational Mindset"}, color:"#7b8fd4"}
 };
 const DIMS = [
-  {id:"insight", cat:"strat", name:"业务洞察能力", note:"知道真正要解决什么问题"},
-  {id:"convert", cat:"strat", name:"问题转化能力", note:"把业务问题拆成AI可执行的任务"},
-  {id:"redesign",cat:"strat", name:"流程重构能力", note:"用AI重新设计工作方式"},
-  {id:"data",    cat:"exec",  name:"数据分析能力", note:"收集清洗分析解读数据"},
-  {id:"collab",  cat:"exec",  name:"人机协同能力", note:"选对工具、人机配合完成任务"},
-  {id:"verify",  cat:"exec",  name:"结果验证能力", note:"判断AI输出是否准确可靠可用"},
-  {id:"learn",   cat:"mind",  name:"持续学习能力", note:"保持好奇、持续试错更新"},
-  {id:"judge",   cat:"mind",  name:"判断与责任能力", note:"不迷信AI,知道何时质疑与拍板"},
-  {id:"safe",    cat:"mind",  name:"合规安全能力", note:"保护企业资产、规避合规陷阱"}
+  {id:"insight", cat:"strat", name:{zh:"业务洞察能力",en:"Business Insight"}, note:{zh:"知道真正要解决什么问题",en:"Knowing what problem truly needs solving"}},
+  {id:"convert", cat:"strat", name:{zh:"问题转化能力",en:"Problem Translation"}, note:{zh:"把业务问题拆成AI可执行的任务",en:"Breaking business problems into AI-executable tasks"}},
+  {id:"redesign",cat:"strat", name:{zh:"流程重构能力",en:"Process Redesign"}, note:{zh:"用AI重新设计工作方式",en:"Redesigning how work gets done with AI"}},
+  {id:"data",    cat:"exec",  name:{zh:"数据分析能力",en:"Data Analysis"}, note:{zh:"收集清洗分析解读数据",en:"Collecting, cleaning, analyzing, and interpreting data"}},
+  {id:"collab",  cat:"exec",  name:{zh:"人机协同能力",en:"Human-AI Collaboration"}, note:{zh:"选对工具、人机配合完成任务",en:"Choosing the right tools and collaborating with AI effectively"}},
+  {id:"verify",  cat:"exec",  name:{zh:"结果验证能力",en:"Result Verification"}, note:{zh:"判断AI输出是否准确可靠可用",en:"Judging whether AI output is accurate, reliable, and usable"}},
+  {id:"learn",   cat:"mind",  name:{zh:"持续学习能力",en:"Continuous Learning"}, note:{zh:"保持好奇、持续试错更新",en:"Staying curious and continuously experimenting"}},
+  {id:"judge",   cat:"mind",  name:{zh:"判断与责任能力",en:"Judgment & Accountability"}, note:{zh:"不迷信AI,知道何时质疑与拍板",en:"Not blindly trusting AI, knowing when to question and decide"}},
+  {id:"safe",    cat:"mind",  name:{zh:"合规安全能力",en:"Compliance & Security"}, note:{zh:"保护企业资产、规避合规陷阱",en:"Protecting company assets and avoiding compliance pitfalls"}}
 ];
 const QS = [
   // 业务洞察
-  {d:"insight", t:"接到一个业务难题时,在动手用AI之前,我会先追问「这背后真正要解决的问题是什么」。"},
-  {d:"insight", t:"我能分辨哪些业务痛点适合用AI解决,哪些其实并不适合。"},
-  {d:"insight", t:"我容易被AI的新功能吸引,而忽略它是否真能解决业务问题。", r:true},
+  {d:"insight", t:{zh:"接到一个业务难题时,在动手用AI之前,我会先追问「这背后真正要解决的问题是什么」。",en:"When faced with a tough business problem, before turning to AI, I first ask what problem this is really trying to solve."}},
+  {d:"insight", t:{zh:"我能分辨哪些业务痛点适合用AI解决,哪些其实并不适合。",en:"I can tell which business pain points are actually suitable for AI to solve, and which are not."}},
+  {d:"insight", t:{zh:"我容易被AI的新功能吸引,而忽略它是否真能解决业务问题。",en:"I'm easily drawn to new AI features while overlooking whether they actually solve the business problem."}, r:true},
   // 问题转化
-  {d:"convert", t:"我能把一个笼统的业务需求,拆解成AI可以逐步执行的具体任务。"},
-  {d:"convert", t:"当AI一次做不好复杂任务时,我会把它拆成更小的步骤分别处理。"},
-  {d:"convert", t:"我常直接把一个大而模糊的需求整个丢给AI,期待它一次给出完美结果。", r:true},
+  {d:"convert", t:{zh:"我能把一个笼统的业务需求,拆解成AI可以逐步执行的具体任务。",en:"I can break a vague business requirement into concrete tasks that AI can execute step by step."}},
+  {d:"convert", t:{zh:"当AI一次做不好复杂任务时,我会把它拆成更小的步骤分别处理。",en:"When AI struggles with a complex task in one go, I break it into smaller steps and handle them separately."}},
+  {d:"convert", t:{zh:"我常直接把一个大而模糊的需求整个丢给AI,期待它一次给出完美结果。",en:"I often hand AI a large, vague request all at once, expecting a perfect result on the first try."}, r:true},
   // 流程重构
-  {d:"redesign", t:"我不满足于用AI替代单个步骤,而会思考如何用AI重新设计整个流程。"},
-  {d:"redesign", t:"引入AI之后,我会主动调整团队的分工与协作方式。"},
-  {d:"redesign", t:"我会识别流程中被AI改变后可以取消或合并的环节。"},
+  {d:"redesign", t:{zh:"我不满足于用AI替代单个步骤,而会思考如何用AI重新设计整个流程。",en:"I'm not satisfied with using AI to replace a single step — I think about redesigning the whole process with AI."}},
+  {d:"redesign", t:{zh:"引入AI之后,我会主动调整团队的分工与协作方式。",en:"After introducing AI, I proactively adjust how the team divides work and collaborates."}},
+  {d:"redesign", t:{zh:"我会识别流程中被AI改变后可以取消或合并的环节。",en:"I identify steps that can be eliminated or merged once AI changes how the work is done."}},
   // 数据分析
-  {d:"data", t:"拿到一堆原始数据,我能完成清洗、整理并从中提炼有用信息。"},
-  {d:"data", t:"我能借助工具对数据进行分析,并解读结果背后的业务含义。"},
-  {d:"data", t:"我会判断数据本身的质量和代表性,而不是照单全收。"},
+  {d:"data", t:{zh:"拿到一堆原始数据,我能完成清洗、整理并从中提炼有用信息。",en:"Given raw data, I can clean and organize it, and extract useful information from it."}},
+  {d:"data", t:{zh:"我能借助工具对数据进行分析,并解读结果背后的业务含义。",en:"I can use tools to analyze data and interpret the business meaning behind the results."}},
+  {d:"data", t:{zh:"我会判断数据本身的质量和代表性,而不是照单全收。",en:"I assess the quality and representativeness of data rather than accepting it at face value."}},
   // 人机协同
-  {d:"collab", t:"面对不同任务,我能选择合适的AI工具,而不是只会用一种。"},
-  {d:"collab", t:"我会通过多轮对话、逐步反馈来引导AI产出更好的结果。"},
-  {d:"collab", t:"我清楚哪些环节交给AI、哪些环节由自己把控,效率最高。"},
+  {d:"collab", t:{zh:"面对不同任务,我能选择合适的AI工具,而不是只会用一种。",en:"For different tasks, I can choose the right AI tool instead of relying on just one."}},
+  {d:"collab", t:{zh:"我会通过多轮对话、逐步反馈来引导AI产出更好的结果。",en:"I guide AI toward better results through multi-turn dialogue and step-by-step feedback."}},
+  {d:"collab", t:{zh:"我清楚哪些环节交给AI、哪些环节由自己把控,效率最高。",en:"I know which steps to hand off to AI and which to control myself for maximum efficiency."}},
   // 结果验证
-  {d:"verify", t:"对AI给出的结果,我会先核实其准确性再使用。"},
-  {d:"verify", t:"我能识别AI输出中的事实错误、逻辑漏洞或「一本正经的胡说」。"},
-  {d:"verify", t:"我倾向于直接采用AI给出的答案,很少再去核对。", r:true},
+  {d:"verify", t:{zh:"对AI给出的结果,我会先核实其准确性再使用。",en:"I verify the accuracy of AI's output before using it."}},
+  {d:"verify", t:{zh:"我能识别AI输出中的事实错误、逻辑漏洞或「一本正经的胡说」。",en:"I can spot factual errors, logical gaps, or confident-sounding nonsense in AI output."}},
+  {d:"verify", t:{zh:"我倾向于直接采用AI给出的答案,很少再去核对。",en:"I tend to accept AI's answers directly and rarely double-check them."}, r:true},
   // 持续学习
-  {d:"learn", t:"我会主动尝试新出现的AI工具和用法。"},
-  {d:"learn", t:"我保持对AI领域变化的关注,持续更新自己的认知。"},
-  {d:"learn", t:"遇到不会用的AI功能,我会通过试错和查资料自己搞定。"},
+  {d:"learn", t:{zh:"我会主动尝试新出现的AI工具和用法。",en:"I actively try out new AI tools and ways of using them."}},
+  {d:"learn", t:{zh:"我保持对AI领域变化的关注,持续更新自己的认知。",en:"I stay attentive to changes in the AI field and keep updating my understanding."}},
+  {d:"learn", t:{zh:"遇到不会用的AI功能,我会通过试错和查资料自己搞定。",en:"When I don't know how to use an AI feature, I figure it out myself through trial and research."}},
   // 判断与责任
-  {d:"judge", t:"重要决策上,我清楚哪些必须由人来拍板,而不能交给AI。"},
-  {d:"judge", t:"对使用AI产出的结果,我愿意承担最终责任。"},
-  {d:"judge", t:"当AI给出结论时,我往往会默认它是对的。", r:true},
+  {d:"judge", t:{zh:"重要决策上,我清楚哪些必须由人来拍板,而不能交给AI。",en:"For important decisions, I know which ones must be made by a human, not handed to AI."}},
+  {d:"judge", t:{zh:"对使用AI产出的结果,我愿意承担最终责任。",en:"I'm willing to take ultimate responsibility for outcomes produced using AI."}},
+  {d:"judge", t:{zh:"当AI给出结论时,我往往会默认它是对的。",en:"When AI gives a conclusion, I tend to assume it's correct by default."}, r:true},
   // 合规安全
-  {d:"safe", t:"使用AI时,我会注意不泄露公司敏感或涉密信息。"},
-  {d:"safe", t:"我了解并遵守数据隐私、版权等相关合规要求。"},
-  {d:"safe", t:"为了图方便,我有时会把公司内部资料直接粘贴给AI工具。", r:true}
+  {d:"safe", t:{zh:"使用AI时,我会注意不泄露公司敏感或涉密信息。",en:"When using AI, I'm careful not to leak sensitive or confidential company information."}},
+  {d:"safe", t:{zh:"我了解并遵守数据隐私、版权等相关合规要求。",en:"I understand and comply with data privacy, copyright, and other relevant regulations."}},
+  {d:"safe", t:{zh:"为了图方便,我有时会把公司内部资料直接粘贴给AI工具。",en:"For convenience, I sometimes paste internal company materials directly into AI tools."}, r:true}
 ];
 const SCALE = [
-  {t:"从不 / 完全不符合", v:1},
-  {t:"偶尔", v:2},
-  {t:"有时", v:3},
-  {t:"经常", v:4},
-  {t:"总是 / 完全符合", v:5}
+  {t:{zh:"从不 / 完全不符合",en:"Never / Not at all true"}, v:1},
+  {t:{zh:"偶尔",en:"Rarely"}, v:2},
+  {t:{zh:"有时",en:"Sometimes"}, v:3},
+  {t:{zh:"经常",en:"Often"}, v:4},
+  {t:{zh:"总是 / 完全符合",en:"Always / Completely true"}, v:5}
 ];
 
 /* 每维度的建议文案(高分优势 / 低分建议) */
 const ADVICE = {
-  insight:{hi:"你能穿透表象抓住真问题,让AI用在刀刃上。继续培养从业务价值倒推技术选型的习惯。",
-           lo:"多问一句「这到底要解决什么」。上手工具前,先用一句话写清业务目标与成功标准,避免为用AI而用AI。"},
-  convert:{hi:"你擅长把模糊需求翻译成可执行任务,这是驾驭AI的核心。可进一步沉淀你的拆解模板。",
-           lo:"练习「任务拆解」:把大需求拆成输入—步骤—输出,复杂任务分步喂给AI,而非期待一次到位。"},
-  redesign:{hi:"你已跳出「替代单步」,在用AI重构流程与协作,这是组织级价值所在。",
-            lo:"尝试画出现有流程图,标出哪些环节可被AI改造、合并或取消,从「优化一步」升级到「重设全程」。"},
-  data:{hi:"你具备扎实的数据素养,能让AI基于可靠数据工作。可尝试建立数据质量检查清单。",
-        lo:"补强数据基本功:学习清洗、整理与解读,并养成质疑数据来源与代表性的习惯。"},
-  collab:{hi:"你懂得因任务选工具、以多轮反馈驯服AI,协同效率很高。",
-          lo:"扩展你的工具箱,练习通过追问、给示例、分步反馈来引导AI;明确哪些交给AI、哪些自己把控。"},
-  verify:{hi:"你对AI输出保持健康的审慎,能识别幻觉与漏洞,交付质量有保障。",
-          lo:"建立「先验证再采用」的默认动作:核对关键事实、检查逻辑,警惕看似专业实则编造的内容。"},
-  learn:{hi:"你保持旺盛的好奇心与试错精神,能持续跟上AI的快速演进。",
-         lo:"给自己设定固定的学习节奏:定期尝试新工具、关注行业动态,把「不会」变成「试试看」。"},
-  judge:{hi:"你不迷信AI,清楚何时采纳、何时质疑、何时由人拍板,并敢于担责。",
-         lo:"强化独立判断:重要决策由人把关,把AI当参谋而非裁判,并对结果承担最终责任。"},
-  safe:{hi:"你有清晰的合规与安全边界,能在用好AI的同时保护企业资产。",
-        lo:"补上合规这一课:不向AI泄露敏感信息,了解数据隐私与版权要求,评估应用中的合规风险。"}
+  insight:{hi:{zh:"你能穿透表象抓住真问题,让AI用在刀刃上。继续培养从业务价值倒推技术选型的习惯。",en:"You can cut through the surface and grasp the real problem, putting AI to its best use. Keep building the habit of working backward from business value to technology choices."},
+           lo:{zh:"多问一句「这到底要解决什么」。上手工具前,先用一句话写清业务目标与成功标准,避免为用AI而用AI。",en:"Ask one more question: “What is this really trying to solve?” Before touching any tool, write a one-sentence business goal and success criteria to avoid using AI just for AI's sake."}},
+  convert:{hi:{zh:"你擅长把模糊需求翻译成可执行任务,这是驾驭AI的核心。可进一步沉淀你的拆解模板。",en:"You're skilled at translating vague requirements into executable tasks — the core skill for mastering AI. Consider codifying your breakdown method into a reusable template."},
+           lo:{zh:"练习「任务拆解」:把大需求拆成输入—步骤—输出,复杂任务分步喂给AI,而非期待一次到位。",en:"Practice “task decomposition”: break big requirements into input–steps–output, and feed complex tasks to AI step by step instead of expecting it to nail it in one shot."}},
+  redesign:{hi:{zh:"你已跳出「替代单步」,在用AI重构流程与协作,这是组织级价值所在。",en:"You've moved beyond “replacing a single step” and are using AI to redesign processes and collaboration — this is where organization-level value lies."},
+            lo:{zh:"尝试画出现有流程图,标出哪些环节可被AI改造、合并或取消,从「优化一步」升级到「重设全程」。",en:"Try mapping out your current process and marking which steps AI could transform, merge, or eliminate — move from “optimizing one step” to “redesigning the whole flow.”"}},
+  data:{hi:{zh:"你具备扎实的数据素养,能让AI基于可靠数据工作。可尝试建立数据质量检查清单。",en:"You have solid data literacy, letting AI work from reliable data. Consider building a data-quality checklist."},
+        lo:{zh:"补强数据基本功:学习清洗、整理与解读,并养成质疑数据来源与代表性的习惯。",en:"Strengthen your data fundamentals: learn to clean, organize, and interpret data, and build the habit of questioning its source and representativeness."}},
+  collab:{hi:{zh:"你懂得因任务选工具、以多轮反馈驯服AI,协同效率很高。",en:"You know how to pick the right tool for each task and guide AI through multi-turn feedback — your collaboration efficiency is high."},
+          lo:{zh:"扩展你的工具箱,练习通过追问、给示例、分步反馈来引导AI;明确哪些交给AI、哪些自己把控。",en:"Expand your toolkit and practice guiding AI through follow-up questions, examples, and step-by-step feedback; be clear about what to hand off to AI and what to control yourself."}},
+  verify:{hi:{zh:"你对AI输出保持健康的审慎,能识别幻觉与漏洞,交付质量有保障。",en:"You maintain healthy skepticism toward AI output and can spot hallucinations and gaps, keeping your deliverables reliable."},
+          lo:{zh:"建立「先验证再采用」的默认动作:核对关键事实、检查逻辑,警惕看似专业实则编造的内容。",en:"Make “verify before you use it” your default move: check key facts, examine the logic, and watch out for confident-sounding content that's actually fabricated."}},
+  learn:{hi:{zh:"你保持旺盛的好奇心与试错精神,能持续跟上AI的快速演进。",en:"You keep a strong sense of curiosity and a willingness to experiment, letting you keep pace with AI's rapid evolution."},
+         lo:{zh:"给自己设定固定的学习节奏:定期尝试新工具、关注行业动态,把「不会」变成「试试看」。",en:"Set yourself a regular learning rhythm: try new tools periodically, follow industry developments, and turn “I don't know how” into “let me try.”"}},
+  judge:{hi:{zh:"你不迷信AI,清楚何时采纳、何时质疑、何时由人拍板,并敢于担责。",en:"You don't blindly trust AI — you know when to accept it, when to question it, and when a human should decide, and you're willing to take responsibility."},
+         lo:{zh:"强化独立判断:重要决策由人把关,把AI当参谋而非裁判,并对结果承担最终责任。",en:"Strengthen your independent judgment: keep humans in charge of important decisions, treat AI as an advisor rather than a judge, and take ultimate responsibility for outcomes."}},
+  safe:{hi:{zh:"你有清晰的合规与安全边界,能在用好AI的同时保护企业资产。",en:"You have clear compliance and security boundaries, protecting company assets while making good use of AI."},
+        lo:{zh:"补上合规这一课:不向AI泄露敏感信息,了解数据隐私与版权要求,评估应用中的合规风险。",en:"Catch up on compliance: don't leak sensitive information to AI, understand data-privacy and copyright requirements, and assess compliance risks in your use cases."}}
 };
 
 /* 等级 */
 function levelOf(p){
-  if(p>=80) return {t:"领先型", c:"var(--good)", d:"该项能力突出,已具备示范与带动他人的水平。"};
-  if(p>=60) return {t:"胜任型", c:"var(--mid)", d:"该项能力稳固,能独立胜任大多数场景。"};
-  if(p>=40) return {t:"发展型", c:"var(--warn)", d:"该项能力初步具备,尚有明显提升空间。"};
-  return {t:"起步型", c:"var(--low)", d:"该项能力较薄弱,建议作为近期重点提升方向。"};
+  const L=I18N[LANG];
+  if(p>=80) return {t:L.levels.lead, c:"var(--good)", d:L.levelDesc.lead};
+  if(p>=60) return {t:L.levels.prof, c:"var(--mid)", d:L.levelDesc.prof};
+  if(p>=40) return {t:L.levels.dev, c:"var(--warn)", d:L.levelDesc.dev};
+  return {t:L.levels.start, c:"var(--low)", d:L.levelDesc.start};
 }
 function barColor(p){ if(p>=80)return"linear-gradient(90deg,#3fc9e0,#8fe6f2)"; if(p>=60)return"linear-gradient(90deg,#4a90d9,#6fbdf0)"; if(p>=40)return"linear-gradient(90deg,#e0a94a,#f2c877)"; return"linear-gradient(90deg,#d55f7d,#ec8fa6)"; }
+
+/* ================= 语言切换 ================= */
+function applyLang(){
+  const L=I18N[LANG];
+  document.title=L.title;
+  document.documentElement.lang = LANG==='en' ? 'en' : 'zh-CN';
+  $('homeLink').textContent=L.home;
+  $('badgeText').textContent=L.badge;
+  $('h1Text').innerHTML=L.h1;
+  $('leadText').innerHTML=L.lead;
+
+  const mbox=$('modelGrid'); mbox.innerHTML='';
+  Object.keys(CATS).forEach(c=>{
+    const dims=DIMS.filter(d=>d.cat===c).map(d=>esc(d.name[LANG])).join('<br>');
+    const el=document.createElement('div'); el.className='mcard';
+    el.innerHTML='<div class="tag">'+esc(CATS[c].name[LANG])+'</div><div class="dim">'+dims+'</div>';
+    mbox.appendChild(el);
+  });
+
+  const metaBox=$('metaLine'); metaBox.innerHTML='';
+  L.metaItems.forEach(m=>{ const sp=document.createElement('span'); sp.innerHTML=m; metaBox.appendChild(sp); });
+
+  $('startBtn').textContent=L.startBtn;
+  $('prevBtn').textContent=L.prevBtn;
+  $('quizRestartBtn').textContent=L.quizRestart;
+  $('radarTitle').textContent=L.radarTitle;
+  $('radarCap').textContent=L.radarCap;
+  $('catsTitle').textContent=L.catsTitle;
+  $('dgridTitle').textContent=L.dgridTitle;
+  $('dgridCap').textContent=L.dgridCap;
+  $('resultRestartBtn').textContent=L.resultRestart;
+  $('imgBtn').textContent=L.imgBtn;
+  const pb=$('printBtn'); if(pb) pb.textContent=L.printBtn;
+  $('mhintText').textContent=L.mhint;
+  $('imgDl').textContent = IS_MOBILE ? L.imgDlMobile : L.imgDl;
+  $('modalCloseBtn').textContent=L.modalClose;
+  $('imgOut').alt=L.imgAlt;
+  $('copyrightText').innerHTML=L.copyright;
+  $('totLabel').textContent=L.totalLabel;
+}
+function setLang(lang){
+  LANG=lang;
+  applyLang();
+}
 
 /* ================= 逻辑 ================= */
 let idx=0, locked=false; const answers=new Array(QS.length).fill(null);
@@ -364,23 +533,29 @@ const $=id=>document.getElementById(id);
 
 function start(){ idx=0; locked=false; answers.fill(null); show('quiz'); render(); }
 function restart(){ idx=0; locked=false; answers.fill(null); show('intro'); window.scrollTo(0,0); }
-function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); $(id).classList.add('active'); }
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  $(id).classList.add('active');
+  // 语言切换只在测评开始前(首页)可用
+  const ls=$('langSwitch'); if(ls) ls.style.display = (id==='intro') ? '' : 'none';
+}
 
 function render(){
   const q=QS[idx], dim=DIMS.find(d=>d.id===q.d), cat=CATS[dim.cat];
   $('qnow').textContent=idx+1;
   $('qbar').style.width=((idx)/QS.length*100)+'%';
-  $('qcat').textContent=cat.name+" · "+dim.name;
+  $('qcat').textContent=cat.name[LANG]+I18N[LANG].qsep+dim.name[LANG];
   $('qcat').style.color=cat.color;
-  $('qtext').textContent=q.t;
+  $('qtext').textContent=q.t[LANG];
   const box=$('opts'); box.innerHTML='';
   SCALE.forEach(s=>{
     const b=document.createElement('button');
     b.className='opt'+(answers[idx]===s.v?' sel':'');
-    b.innerHTML='<span class="dot"></span><span>'+s.t+'</span>';
+    b.innerHTML='<span class="dot"></span><span>'+s.t[LANG]+'</span>';
     b.onclick=()=>choose(s.v);
     box.appendChild(b);
   });
+  $('prevBtn').textContent=I18N[LANG].prevBtn;
   $('prevBtn').style.visibility = idx===0?'hidden':'visible';
 }
 function choose(v){
@@ -431,7 +606,7 @@ function paint(total,catPct,dimPct){
   setTimeout(()=>{ ring.style.transition='stroke-dashoffset 1.4s ease'; ring.style.strokeDashoffset=off; },100);
   animateNum($('totScore'),total,1200);
   const lv=levelOf(total);
-  $('totLevel').textContent="综合水平:"+lv.t;
+  $('totLevel').textContent=I18N[LANG].totLevelPrefix+lv.t;
   $('totLevel').style.color=lv.c;
   $('totDesc').textContent=descFor(total,catPct);
 
@@ -440,7 +615,7 @@ function paint(total,catPct,dimPct){
   Object.keys(CATS).forEach(c=>{
     const p=catPct[c], l=levelOf(p);
     const el=document.createElement('div'); el.className='catc';
-    el.innerHTML='<div class="cn">'+CATS[c].name+'</div><div class="cs" style="color:'+l.c+'">'+p+'</div>'+
+    el.innerHTML='<div class="cn">'+esc(CATS[c].name[LANG])+'</div><div class="cs" style="color:'+l.c+'">'+p+'</div>'+
       '<div class="cl" style="color:'+l.c+';background:rgba(255,255,255,.06)">'+l.t+'</div>';
     cbox.appendChild(el);
   });
@@ -449,13 +624,13 @@ function paint(total,catPct,dimPct){
   const g=$('dgrid'); g.innerHTML='';
   DIMS.forEach(d=>{
     const p=dimPct[d.id], l=levelOf(p);
-    const adv = p>=60 ? ADVICE[d.id].hi : ADVICE[d.id].lo;
+    const adv = p>=60 ? ADVICE[d.id].hi[LANG] : ADVICE[d.id].lo[LANG];
     const row=document.createElement('div'); row.className='drow';
     row.innerHTML=
-      '<div class="dh"><div class="dn">'+d.name+'<small>'+CATS[d.cat].name+' · '+d.note+'</small></div>'+
+      '<div class="dh"><div class="dn">'+esc(d.name[LANG])+'<small>'+esc(CATS[d.cat].name[LANG]+I18N[LANG].qsep+d.note[LANG])+'</small></div>'+
       '<div class="dv" style="color:'+l.c+'">'+p+'</div></div>'+
       '<div class="track"><span data-w="'+p+'" style="background:'+barColor(p)+'"></span></div>'+
-      '<div class="adv"><span class="lab" style="color:'+l.c+';background:rgba(255,255,255,.06)">'+l.t+'</span>'+adv+'</div>';
+      '<div class="adv"><span class="lab" style="color:'+l.c+';background:rgba(255,255,255,.06)">'+esc(l.t)+'</span>'+esc(adv)+'</div>';
     g.appendChild(row);
   });
   setTimeout(()=>document.querySelectorAll('.track>span').forEach(s=>s.style.width=s.dataset.w+'%'),200);
@@ -463,16 +638,15 @@ function paint(total,catPct,dimPct){
   drawRadar(dimPct);
 }
 function descFor(total,catPct){
-  const top=DIMS.reduce((a,b)=> a.p>=b.p?a:b, {p:-1});
-  // 找最强最弱分类
+  const L=I18N[LANG];
   const arr=Object.keys(CATS).map(c=>({c,p:catPct[c]})).sort((a,b)=>b.p-a.p);
-  const strong=CATS[arr[0].c].name, weak=CATS[arr[2].c].name;
+  const strong=CATS[arr[0].c].name[LANG], weak=CATS[arr[2].c].name[LANG];
   let base;
-  if(total>=80) base="你已是AI时代的高胜任力人才,三层能力协同良好。";
-  else if(total>=60) base="你已具备扎实的AI应用胜任力,整体表现稳健。";
-  else if(total>=40) base="你正走在成为AI人才的路上,基础已经形成。";
-  else base="你正处于AI能力建设的起步阶段,潜力空间很大。";
-  return base+"你的相对优势在「"+strong+"」,而「"+weak+"」是当前最值得投入的提升方向。";
+  if(total>=80) base=L.descBase.a;
+  else if(total>=60) base=L.descBase.b;
+  else if(total>=40) base=L.descBase.c;
+  else base=L.descBase.d;
+  return base+L.descTail(strong,weak);
 }
 function animateNum(el,to,dur){
   const st=performance.now();
@@ -497,7 +671,7 @@ function radarInner(cx,cy,R,dimPct,anim,gid){
     if(dx>6)anchor='start'; else if(dx<-6)anchor='end';
     const p=dimPct[d.id];
     const col = p>=80?'#8fe6f2':p>=60?'#9fc7f0':p>=40?'#f2c877':'#ec8fa6';
-    s+='<text x="'+lx.toFixed(1)+'" y="'+ly.toFixed(1)+'" fill="#cfe6ff" font-size="12.5" font-weight="600" text-anchor="'+anchor+'" dominant-baseline="middle">'+d.name+'</text>';
+    s+='<text x="'+lx.toFixed(1)+'" y="'+ly.toFixed(1)+'" fill="#cfe6ff" font-size="12.5" font-weight="600" text-anchor="'+anchor+'" dominant-baseline="middle">'+esc(d.name[LANG])+'</text>';
     s+='<text x="'+lx.toFixed(1)+'" y="'+(ly+15).toFixed(1)+'" fill="'+col+'" font-size="12" font-weight="700" text-anchor="'+anchor+'" dominant-baseline="middle">'+p+'%</text>';
   });
   const dpts=DIMS.map((d,i)=>pt(i,R*dimPct[d.id]/100));
@@ -513,78 +687,119 @@ function drawRadar(dimPct){
 }
 
 /* ====== 结果长图（自绘SVG→PNG），手机长按可存相册 ====== */
+// 固定指向 https://www.deepblueinfo.com/AICompetencyAssess.html 的二维码矩阵（预生成，纯前端渲染，无需外部依赖）
+const QR_MATRIX=['111111100000010111111101001111111','100000100111111111001110101000001','101110101000110011100110001011101','101110101001101010010010101011101','101110101101100101100111001011101','100000101100000111000110001000001','111111101010101010101010101111111','000000001111101100101111100000000','101111100100001101010010101111100','111111011110000000111101001101101','110100100100100110101000111010110','001110011111001110001111001011111','001001100101100000100011010111011','111001010101001110011111001001011','111001110001010001001110011001110','100000001010111010101111111001100','011110100101110001010010110111001','111001001001011011111111111101101','000111100100000111001000000110110','100010000101010011101111011111111','011001110001100010000000010111000','100000001111111101111101011000101','100010110111111111000100010100110','101001000111101100001100111001100','101000100000010101101010111110010','000000001100111010111001100010100','111111100110111110100011101010110','100000101100010000001101100011110','101110101011001100111010111111001','101110101011101111011101010011111','101110101110001001000001111101100','100000100000100010100100101011100','111111101100010001010011110101010'];
+// 生成二维码SVG片段：cx/cy为整体（含白底+文案）中心x与白块顶部y，modulePx为每个模块像素边长
+function qrSVG(x,y,modulePx){
+  const n=QR_MATRIX.length; let s='';
+  for(let r=0;r<n;r++){
+    const row=QR_MATRIX[r]; let c=0;
+    while(c<n){
+      if(row[c]==='1'){
+        let c2=c; while(c2<n && row[c2]==='1') c2++;
+        s+='<rect x="'+(x+c*modulePx).toFixed(1)+'" y="'+(y+r*modulePx).toFixed(1)+'" width="'+((c2-c)*modulePx).toFixed(1)+'" height="'+modulePx.toFixed(1)+'" fill="#0a1a3a"/>';
+        c=c2;
+      } else c++;
+    }
+  }
+  return s;
+}
 function hexFor(p){ return p>=80?'#3fc9e0':p>=60?'#5aa9e6':p>=40?'#e0a94a':'#d55f7d'; }
 function esc(t){ return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-// 中文按字符数折行（含标点，简单可靠）
+// 中文按字符数折行，英文按单词折行（含标点，简单可靠）
 function wrapCN(text,max){ const out=[]; let ln=''; for(const ch of String(text)){ ln+=ch; if(ln.length>=max){ out.push(ln); ln=''; } } if(ln) out.push(ln); return out; }
+function wrapText(text,maxZh){
+  if(LANG==='en'){
+    const maxLen=Math.round(maxZh*1.7);
+    const words=String(text).split(' ');
+    const out=[]; let ln='';
+    words.forEach(w=>{
+      const trial=ln?ln+' '+w:w;
+      if(trial.length>maxLen && ln){ out.push(ln); ln=w; } else { ln=trial; }
+    });
+    if(ln) out.push(ln);
+    return out;
+  }
+  return wrapCN(text,maxZh);
+}
 function buildReportSVG(){
   const R=window.__res; if(!R) return null;
   const {total,catPct,dimPct}=R, W=760, pad=40;
-  const lv=levelOf(total);
+  const lv=levelOf(total), Lr=I18N[LANG].report;
   const NS='http://www.w3.org/2000/svg';
   let s=''; // 先构建内容，最后再算总高度
   // 顶部标题
-  s+='<text x="'+W/2+'" y="52" text-anchor="middle" fill="#eaf4ff" font-size="26" font-weight="800">AI 人才胜任力自评 · 结果报告</text>';
+  s+='<text x="'+W/2+'" y="52" text-anchor="middle" fill="#eaf4ff" font-size="26" font-weight="800">'+esc(Lr.title)+'</text>';
   const d0=new Date(), iso=d0.getFullYear()+'-'+String(d0.getMonth()+1).padStart(2,'0')+'-'+String(d0.getDate()).padStart(2,'0');
-  s+='<text x="'+W/2+'" y="80" text-anchor="middle" fill="#8fb8e6" font-size="13">三层九维模型 · 测评日期 '+iso+'</text>';
+  s+='<text x="'+W/2+'" y="80" text-anchor="middle" fill="#8fb8e6" font-size="13">'+esc(Lr.dateLine+iso)+'</text>';
   // 综合得分环
   const cx=W/2, cy=180, rr=62, C=2*Math.PI*rr, off=C*(1-total/100);
   s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+rr+'" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="12"/>';
   s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+rr+'" fill="none" stroke="#3fc9e0" stroke-width="12" stroke-linecap="round" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'" transform="rotate(-90 '+cx+' '+cy+')"/>';
   s+='<text x="'+cx+'" y="'+(cy+8)+'" text-anchor="middle" fill="#8fe6f2" font-size="46" font-weight="800">'+total+'</text>';
-  s+='<text x="'+cx+'" y="'+(cy+34)+'" text-anchor="middle" fill="#7f9dc4" font-size="12">综合得分</text>';
+  s+='<text x="'+cx+'" y="'+(cy+34)+'" text-anchor="middle" fill="#7f9dc4" font-size="12">'+esc(Lr.score)+'</text>';
   // 等级药丸（彩色描边+底色，视觉更醒目）—— 下移，避免与分数环重叠
-  const lvTxt='综合水平 · '+lv.t, pillW=lvTxt.length*17+44, lvcol=hexFor(total);
+  const lvTxt=Lr.levelPrefix+lv.t, pillW=lvTxt.length*13+56, lvcol=hexFor(total);
   s+='<rect x="'+(cx-pillW/2)+'" y="'+(cy+82)+'" width="'+pillW+'" height="32" rx="16" fill="'+lvcol+'" fill-opacity="0.14" stroke="'+lvcol+'" stroke-opacity="0.6"/>';
-  s+='<text x="'+cx+'" y="'+(cy+103)+'" text-anchor="middle" fill="'+lvcol+'" font-size="17" font-weight="800">'+lvTxt+'</text>';
+  s+='<text x="'+cx+'" y="'+(cy+103)+'" text-anchor="middle" fill="'+lvcol+'" font-size="17" font-weight="800">'+esc(lvTxt)+'</text>';
   // 综合评语（折行）
   let y=cy+146;
-  wrapCN(descFor(total,catPct),42).forEach(line=>{ s+='<text x="'+W/2+'" y="'+y+'" text-anchor="middle" fill="#a9c4e6" font-size="13.5">'+esc(line)+'</text>'; y+=21; });
+  wrapText(descFor(total,catPct),42).forEach(line=>{ s+='<text x="'+W/2+'" y="'+y+'" text-anchor="middle" fill="#a9c4e6" font-size="13.5">'+esc(line)+'</text>'; y+=21; });
   // 雷达
   y+=18;
-  s+='<text x="'+pad+'" y="'+y+'" fill="#eaf4ff" font-size="16" font-weight="700">九维能力雷达</text>';
+  s+='<text x="'+pad+'" y="'+y+'" fill="#eaf4ff" font-size="16" font-weight="700">'+esc(Lr.radar)+'</text>';
   const radarTop=y+8, R150=150;
   s+=radarInner(W/2, radarTop+R150+45, R150, dimPct, false, 'rgimg');
   y=radarTop+2*R150+90;
   // 三大分类
   y+=6;
-  s+='<text x="'+pad+'" y="'+y+'" fill="#eaf4ff" font-size="16" font-weight="700">三大分类概览</text>';
+  s+='<text x="'+pad+'" y="'+y+'" fill="#eaf4ff" font-size="16" font-weight="700">'+esc(Lr.cats)+'</text>';
   const cats=Object.keys(CATS), bw=(W-2*pad-2*20)/3, catY=y+14;
   cats.forEach((c,i)=>{
     const x=pad+i*(bw+20), p=catPct[c], l=levelOf(p), col=hexFor(p);
     s+='<rect x="'+x+'" y="'+catY+'" width="'+bw+'" height="86" rx="14" fill="rgba(255,255,255,.06)" stroke="rgba(255,255,255,.12)"/>';
-    s+='<text x="'+(x+bw/2)+'" y="'+(catY+26)+'" text-anchor="middle" fill="#a9c4e6" font-size="14" font-weight="700">'+CATS[c].name+'</text>';
+    s+='<text x="'+(x+bw/2)+'" y="'+(catY+26)+'" text-anchor="middle" fill="#a9c4e6" font-size="14" font-weight="700">'+esc(CATS[c].name[LANG])+'</text>';
     s+='<text x="'+(x+bw/2)+'" y="'+(catY+62)+'" text-anchor="middle" fill="'+col+'" font-size="30" font-weight="800">'+p+'</text>';
-    s+='<text x="'+(x+bw/2)+'" y="'+(catY+80)+'" text-anchor="middle" fill="'+col+'" font-size="11" font-weight="700">'+l.t+'</text>';
+    s+='<text x="'+(x+bw/2)+'" y="'+(catY+80)+'" text-anchor="middle" fill="'+col+'" font-size="11" font-weight="700">'+esc(l.t)+'</text>';
   });
   y=catY+86;
   // 九维度详解与建议
   y+=40;
-  s+='<text x="'+pad+'" y="'+y+'" fill="#eaf4ff" font-size="16" font-weight="700">九维度详解与建议</text>';
+  s+='<text x="'+pad+'" y="'+y+'" fill="#eaf4ff" font-size="16" font-weight="700">'+esc(Lr.dgrid)+'</text>';
   y+=16;
   const barW=W-2*pad-70;
   DIMS.forEach(d=>{
     const p=dimPct[d.id], col=hexFor(p), l=levelOf(p);
-    const adv=(p>=60?ADVICE[d.id].hi:ADVICE[d.id].lo);
-    s+='<text x="'+pad+'" y="'+(y+16)+'" fill="#eaf4ff" font-size="14.5" font-weight="700">'+esc(d.name)+' <tspan fill="#7f9dc4" font-size="11" font-weight="400">'+esc(CATS[d.cat].name+' · '+d.note)+'</tspan></text>';
+    const adv=(p>=60?ADVICE[d.id].hi[LANG]:ADVICE[d.id].lo[LANG]);
+    s+='<text x="'+pad+'" y="'+(y+16)+'" fill="#eaf4ff" font-size="14.5" font-weight="700">'+esc(d.name[LANG])+' <tspan fill="#7f9dc4" font-size="11" font-weight="400">'+esc(CATS[d.cat].name[LANG]+I18N[LANG].qsep+d.note[LANG])+'</tspan></text>';
     s+='<text x="'+(W-pad)+'" y="'+(y+16)+'" text-anchor="end" fill="'+col+'" font-size="17" font-weight="800">'+p+'</text>';
     s+='<rect x="'+pad+'" y="'+(y+26)+'" width="'+barW+'" height="9" rx="4.5" fill="rgba(255,255,255,.16)"/>';
     s+='<rect x="'+pad+'" y="'+(y+26)+'" width="'+(barW*p/100).toFixed(1)+'" height="9" rx="4.5" fill="'+col+'"/>';
     // 等级标签 + 建议（折行）
     let ay=y+52;
-    s+='<rect x="'+pad+'" y="'+(ay-13)+'" width="52" height="18" rx="9" fill="rgba(255,255,255,.07)"/>';
-    s+='<text x="'+(pad+26)+'" y="'+(ay)+'" text-anchor="middle" fill="'+col+'" font-size="11" font-weight="700">'+l.t+'</text>';
-    const advLines=wrapCN(adv,40);
-    advLines.forEach((line,li)=>{ s+='<text x="'+(pad+62)+'" y="'+(ay+li*20)+'" fill="#c3d8f2" font-size="13">'+esc(line)+'</text>'; });
+    const labW = LANG==='en' ? Math.max(52, l.t.length*7+16) : 52;
+    s+='<rect x="'+pad+'" y="'+(ay-13)+'" width="'+labW+'" height="18" rx="9" fill="rgba(255,255,255,.07)"/>';
+    s+='<text x="'+(pad+labW/2)+'" y="'+(ay)+'" text-anchor="middle" fill="'+col+'" font-size="11" font-weight="700">'+esc(l.t)+'</text>';
+    const advX=pad+labW+10;
+    const advLines=wrapText(adv,40);
+    advLines.forEach((line,li)=>{ s+='<text x="'+advX+'" y="'+(ay+li*20)+'" fill="#c3d8f2" font-size="13">'+esc(line)+'</text>'; });
     y = ay + advLines.length*20 + 14;
   });
   // 版权
   y+=18;
   s+='<line x1="'+pad+'" y1="'+(y-14)+'" x2="'+(W-pad)+'" y2="'+(y-14)+'" stroke="rgba(255,255,255,.1)"/>';
-  s+='<text x="'+W/2+'" y="'+(y+6)+'" text-anchor="middle" fill="#8fb8e6" font-size="12">版权所有 © 深蓝君管理咨询（上海）有限公司</text>';
-  s+='<text x="'+W/2+'" y="'+(y+26)+'" text-anchor="middle" fill="#7f9dc4" font-size="12">作者：徐刚（深蓝君） · 联系微信号：deepblueinfo1</text>';
-  s+='<text x="'+W/2+'" y="'+(y+46)+'" text-anchor="middle" fill="#7f9dc4" font-size="12">主页：www.deepblueinfo.com</text>';
-  const H=y+72;
+  s+='<text x="'+W/2+'" y="'+(y+6)+'" text-anchor="middle" fill="#8fb8e6" font-size="12">'+esc(Lr.copyright1)+'</text>';
+  s+='<text x="'+W/2+'" y="'+(y+26)+'" text-anchor="middle" fill="#7f9dc4" font-size="12">'+esc(Lr.copyright2)+'</text>';
+  s+='<text x="'+W/2+'" y="'+(y+46)+'" text-anchor="middle" fill="#7f9dc4" font-size="12">'+esc(Lr.copyright3)+'</text>';
+  y+=68;
+  // 二维码（固定指向本测评页面，尺寸克制，不喧宾夺主）
+  const qrN=QR_MATRIX.length, qrPx=2.8, qrSide=qrN*qrPx, qrPad=12, boxW=qrSide+2*qrPad, boxH=qrSide+2*qrPad;
+  const boxX=W/2-boxW/2, boxY=y;
+  s+='<text x="'+W/2+'" y="'+(boxY+14)+'" text-anchor="middle" fill="#7f9dc4" font-size="12" font-weight="600">'+esc(Lr.qr)+'</text>';
+  const qrBoxY=boxY+24;
+  s+='<rect x="'+boxX.toFixed(1)+'" y="'+qrBoxY.toFixed(1)+'" width="'+boxW.toFixed(1)+'" height="'+boxH.toFixed(1)+'" rx="10" fill="#ffffff"/>';
+  s+=qrSVG(boxX+qrPad, qrBoxY+qrPad, qrPx);
+  const H=qrBoxY+boxH+30;
   // 组装：背景 + 内容
   let head='<svg xmlns="'+NS+'" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" font-family="-apple-system,\'PingFang SC\',\'Microsoft YaHei\',sans-serif">';
   head+='<defs><linearGradient id="bgg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0a1a3a"/><stop offset="0.55" stop-color="#0e2452"/><stop offset="1" stop-color="#153a6b"/></linearGradient></defs>';
@@ -592,7 +807,8 @@ function buildReportSVG(){
   return {svg:head+s+'</svg>', W, H};
 }
 function saveImage(){
-  const rep=buildReportSVG(); if(!rep){ alert('请先完成测评'); return; }
+  const L=I18N[LANG];
+  const rep=buildReportSVG(); if(!rep){ alert(L.pleaseComplete); return; }
   const scale=2;
   const img=new Image();
   const blob=new Blob([rep.svg],{type:'image/svg+xml;charset=utf-8'});
@@ -602,24 +818,22 @@ function saveImage(){
     const ctx=cv.getContext('2d'); ctx.scale(scale,scale); ctx.drawImage(img,0,0);
     URL.revokeObjectURL(url);
     let data;
-    try{ data=cv.toDataURL('image/png'); }catch(e){ alert('生成图片失败，请改用截图保存'); return; }
+    try{ data=cv.toDataURL('image/png'); }catch(e){ alert(L.genImgFail); return; }
     const d=new Date(), iso=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
     document.getElementById('imgOut').src=data;
-    const dl=document.getElementById('imgDl'); dl.href=data; dl.download='AI人才胜任力自评结果_'+iso+'.png';
+    const dl=document.getElementById('imgDl'); dl.href=data; dl.download=L.dlFileBase+'_'+iso+'.png';
     document.getElementById('imgModal').classList.add('show');
   };
-  img.onerror=function(){ URL.revokeObjectURL(url); alert('生成图片失败，请改用手机截图保存'); };
+  img.onerror=function(){ URL.revokeObjectURL(url); alert(L.genImgFail2); };
   img.src=url;
 }
 function closeModal(){ document.getElementById('imgModal').classList.remove('show'); }
 function printRes(){ window.print(); }
 
 /* 设备识别：手机隐藏打印按钮（打印在移动端浏览器不可靠） */
-const IS_MOBILE = matchMedia('(pointer:coarse)').matches || /iPhone|iPad|iPod|Android|HarmonyOS|Mobile/i.test(navigator.userAgent);
 window.addEventListener('DOMContentLoaded',()=>{
-  if(IS_MOBILE){ const pb=document.getElementById('printBtn'); if(pb) pb.style.display='none';
-    const dl=document.getElementById('imgDl'); if(dl) dl.textContent='下载图片(部分手机)';
-  }
+  if(IS_MOBILE){ const pb=document.getElementById('printBtn'); if(pb) pb.style.display='none'; }
+  applyLang();
 });
 
 /* ================= 背景粒子 ================= */
