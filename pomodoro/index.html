@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>番茄钟</title>
+<style>
+  :root {
+    --c1: #3fc9e0; --c2: #5aa9e6; --c3: #7b8fd4;
+    --txt: #eaf4ff; --sub: #a9c4e6; --muted: #7f9dc4;
+    --card: rgba(255,255,255,0.06); --cardb: rgba(255,255,255,0.12);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', 'Segoe UI', Roboto, sans-serif;
+    background: #0b1c3e;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--txt);
+    padding: 20px;
+    overflow-x: hidden;
+    position: relative;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(1200px 900px at 18% 6%, #1c3f7a 0%, transparent 60%),
+      radial-gradient(1100px 800px at 95% 2%, #123a60 0%, transparent 55%),
+      linear-gradient(160deg, #0a1a3a 0%, #0e2452 55%, #153a6b 100%);
+  }
+  #bgcanvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+  .glow { position: fixed; border-radius: 50%; filter: blur(70px); opacity: .5; z-index: 0; pointer-events: none; animation: float 14s ease-in-out infinite; }
+  .g1 { width: 340px; height: 340px; background: #2f8fd0; top: -80px; left: -60px; }
+  .g2 { width: 300px; height: 300px; background: #3fc9e0; bottom: -60px; right: -40px; animation-delay: -5s; }
+  @keyframes float { 0%,100% { transform: translate(0,0) } 50% { transform: translate(30px,-30px) } }
+
+  .container {
+    position: relative; z-index: 1;
+    text-align: center;
+    width: 100%;
+    max-width: 420px;
+  }
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 24px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    background: linear-gradient(90deg, var(--c1), #8fe6f2);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .mode-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+  .mode-tab {
+    padding: 8px 20px;
+    border-radius: 24px;
+    border: 1px solid var(--cardb);
+    background: var(--card);
+    color: var(--sub);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.25s ease;
+  }
+  .mode-tab:hover { border-color: rgba(63,201,224,.5); color: var(--txt); }
+  .mode-tab.active {
+    background: rgba(63,201,224,.16);
+    color: var(--txt);
+    border-color: var(--c1);
+  }
+
+  .timer-ring-wrapper {
+    position: relative;
+    width: 280px;
+    height: 280px;
+    margin: 0 auto 32px;
+  }
+  .timer-ring-svg {
+    transform: rotate(-90deg);
+    width: 100%;
+    height: 100%;
+  }
+  .timer-ring-bg {
+    fill: none;
+    stroke: rgba(255,255,255,0.08);
+    stroke-width: 8;
+  }
+  .timer-ring-progress {
+    fill: none;
+    stroke: #3fc9e0;
+    stroke-width: 8;
+    stroke-linecap: round;
+    stroke-dasharray: 817;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1s linear, stroke 0.5s ease;
+  }
+  .timer-ring-progress.short-break { stroke: #5aa9e6; }
+  .timer-ring-progress.long-break { stroke: #7b8fd4; }
+
+  .timer-display {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 4rem;
+    font-weight: 200;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 2px;
+    color: var(--txt);
+  }
+  .timer-label {
+    position: absolute;
+    top: 68%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.9rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .task-input {
+    width: 100%;
+    max-width: 320px;
+    padding: 12px 20px;
+    border-radius: 12px;
+    border: 1px solid var(--cardb);
+    background: var(--card);
+    color: var(--txt);
+    font-size: 1rem;
+    text-align: center;
+    margin-bottom: 24px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  .task-input::placeholder { color: var(--muted); }
+  .task-input:focus { border-color: rgba(63, 201, 224, 0.6); }
+
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .btn {
+    padding: 14px 36px;
+    border-radius: 40px;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    font-weight: 700;
+    letter-spacing: .5px;
+  }
+  .btn-primary {
+    background: linear-gradient(90deg, var(--c1), #6fdcec);
+    color: #04203a;
+    box-shadow: 0 8px 26px rgba(63, 201, 224, 0.4);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 34px rgba(63, 201, 224, 0.55); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--sub);
+    border: 1px solid var(--cardb);
+  }
+  .btn-secondary:hover { border-color: rgba(63,201,224,.5); color: var(--txt); }
+
+  .stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+  .stat-value {
+    font-size: 1.4rem;
+    color: var(--c1);
+    font-weight: 700;
+    margin-top: 4px;
+  }
+
+  .notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-80px);
+    background: rgba(63, 201, 224, 0.95);
+    color: #04203a;
+    padding: 12px 28px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    opacity: 0;
+    transition: all 0.4s ease;
+    pointer-events: none;
+    z-index: 100;
+  }
+  .notification.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+  .notification.short { background: rgba(90, 169, 230, 0.95); color: #fff; }
+  .notification.long { background: rgba(123, 143, 212, 0.95); color: #fff; }
+
+  @media (max-width: 480px) {
+    .timer-ring-wrapper { width: 240px; height: 240px; }
+    .timer-display { font-size: 3.2rem; }
+    h1 { font-size: 1.6rem; }
+  }
+</style>
+</head>
+<body>
+<canvas id="bgcanvas"></canvas>
+<div class="glow g1"></div><div class="glow g2"></div>
+<div class="container">
+  <h1>番茄钟</h1>
+
+  <div class="mode-tabs">
+    <div class="mode-tab active" data-mode="focus">专注</div>
+    <div class="mode-tab" data-mode="short">短休息</div>
+    <div class="mode-tab" data-mode="long">长休息</div>
+  </div>
+
+  <div class="timer-ring-wrapper">
+    <svg class="timer-ring-svg" viewBox="0 0 280 280">
+      <circle class="timer-ring-bg" cx="140" cy="140" r="130"></circle>
+      <circle class="timer-ring-progress" id="progressRing" cx="140" cy="140" r="130"></circle>
+    </svg>
+    <div class="timer-display" id="timerDisplay">25:00</div>
+    <div class="timer-label" id="timerLabel">专注时间</div>
+  </div>
+
+  <input type="text" class="task-input" id="taskInput" placeholder="当前任务名称...">
+
+  <div class="controls">
+    <button class="btn btn-primary" id="startBtn">开始</button>
+    <button class="btn btn-secondary" id="resetBtn">重置</button>
+  </div>
+
+  <div class="stats">
+    <div>
+      <div>已完成</div>
+      <div class="stat-value" id="completedCount">0</div>
+    </div>
+    <div>
+      <div>总专注</div>
+      <div class="stat-value" id="totalMinutes">0 分钟</div>
+    </div>
+  </div>
+</div>
+
+<div class="notification" id="notification"></div>
+
+<script>
+const MODES = {
+  focus: { minutes: 25, label: '专注时间', ringClass: '' },
+  short: { minutes: 5, label: '短休息', ringClass: 'short-break' },
+  long: { minutes: 15, label: '长休息', ringClass: 'long-break' }
+};
+
+const RING_CIRCUMFERENCE = 2 * Math.PI * 130;
+
+let currentMode = 'focus';
+let timeLeft = MODES.focus.minutes * 60;
+let totalTime = timeLeft;
+let isRunning = false;
+let timerInterval = null;
+let completedSessions = 0;
+let totalFocusMinutes = 0;
+let audioCtx = null;
+
+const timerDisplay = document.getElementById('timerDisplay');
+const timerLabel = document.getElementById('timerLabel');
+const progressRing = document.getElementById('progressRing');
+const startBtn = document.getElementById('startBtn');
+const resetBtn = document.getElementById('resetBtn');
+const taskInput = document.getElementById('taskInput');
+const notification = document.getElementById('notification');
+const completedCountEl = document.getElementById('completedCount');
+const totalMinutesEl = document.getElementById('totalMinutes');
+
+progressRing.style.strokeDasharray = `${RING_CIRCUMFERENCE} ${RING_CIRCUMFERENCE}`;
+progressRing.style.strokeDashoffset = 0;
+
+function formatTime(seconds) {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+function updateDisplay() {
+  timerDisplay.textContent = formatTime(timeLeft);
+  const offset = RING_CIRCUMFERENCE - (timeLeft / totalTime) * RING_CIRCUMFERENCE;
+  progressRing.style.strokeDashoffset = offset;
+}
+
+function switchMode(mode) {
+  currentMode = mode;
+  totalTime = MODES[mode].minutes * 60;
+  timeLeft = totalTime;
+  isRunning = false;
+  clearInterval(timerInterval);
+  startBtn.textContent = '开始';
+  timerLabel.textContent = MODES[mode].label;
+  progressRing.className = 'timer-ring-progress ' + MODES[mode].ringClass;
+  updateDisplay();
+
+  document.querySelectorAll('.mode-tab').forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.mode === mode);
+  });
+}
+
+function playAlarm() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const now = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(523, now);
+  osc.frequency.setValueAtTime(659, now + 0.2);
+  osc.frequency.setValueAtTime(784, now + 0.4);
+  gain.gain.setValueAtTime(0.3, now);
+  gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+  osc.start(now);
+  osc.stop(now + 0.8);
+}
+
+function showNotification(text, type) {
+  notification.textContent = text;
+  notification.className = 'notification show ' + (type || '');
+  setTimeout(() => notification.classList.remove('show'), 3000);
+}
+
+function onTimerComplete() {
+  clearInterval(timerInterval);
+  isRunning = false;
+  startBtn.textContent = '开始';
+  playAlarm();
+
+  if (currentMode === 'focus') {
+    completedSessions++;
+    totalFocusMinutes += MODES.focus.minutes;
+    completedCountEl.textContent = completedSessions;
+    totalMinutesEl.textContent = totalFocusMinutes + ' 分钟';
+
+    const nextMode = completedSessions % 4 === 0 ? 'long' : 'short';
+    showNotification('专注完成！' + (nextMode === 'long' ? '该长休息了' : '休息一下吧'), nextMode);
+    switchMode(nextMode);
+  } else {
+    showNotification('休息结束！准备开始新的专注', 'focus');
+    switchMode('focus');
+  }
+}
+
+function toggleTimer() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+
+  if (isRunning) {
+    clearInterval(timerInterval);
+    isRunning = false;
+    startBtn.textContent = '继续';
+  } else {
+    isRunning = true;
+    startBtn.textContent = '暂停';
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      updateDisplay();
+      document.title = formatTime(timeLeft) + ' - ' + MODES[currentMode].label;
+      if (timeLeft <= 0) {
+        onTimerComplete();
+        document.title = '番茄钟';
+      }
+    }, 1000);
+  }
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  isRunning = false;
+  startBtn.textContent = '开始';
+  timeLeft = totalTime;
+  updateDisplay();
+  document.title = '番茄钟';
+}
+
+document.querySelectorAll('.mode-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    if (isRunning) {
+      if (!confirm('切换模式会重置当前计时，是否继续？')) return;
+    }
+    switchMode(tab.dataset.mode);
+  });
+});
+
+startBtn.addEventListener('click', toggleTimer);
+resetBtn.addEventListener('click', resetTimer);
+
+updateDisplay();
+
+// 背景粒子
+(function(){
+  const cv=document.getElementById('bgcanvas'), c=cv.getContext('2d');
+  let W,H,pts;
+  function rz(){ W=cv.width=innerWidth; H=cv.height=innerHeight;
+    pts=Array.from({length:Math.min(70,Math.floor(W*H/22000))},()=>({
+      x:Math.random()*W, y:Math.random()*H, vx:(Math.random()-.5)*.35, vy:(Math.random()-.5)*.35, r:Math.random()*1.8+.6 })); }
+  rz(); addEventListener('resize',rz);
+  (function loop(){ c.clearRect(0,0,W,H);
+    for(let i=0;i<pts.length;i++){ const p=pts[i];
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0||p.x>W)p.vx*=-1; if(p.y<0||p.y>H)p.vy*=-1;
+      c.beginPath(); c.arc(p.x,p.y,p.r,0,7); c.fillStyle='rgba(120,200,235,.55)'; c.fill();
+      for(let j=i+1;j<pts.length;j++){ const q=pts[j], dx=p.x-q.x, dy=p.y-q.y, dd=dx*dx+dy*dy;
+        if(dd<11000){ c.beginPath(); c.moveTo(p.x,p.y); c.lineTo(q.x,q.y);
+          c.strokeStyle='rgba(90,169,230,'+(0.14*(1-dd/11000))+')'; c.lineWidth=1; c.stroke(); } } }
+    requestAnimationFrame(loop); })();
+})();
+</script>
+</body>
+</html>
